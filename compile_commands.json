@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/home/devooty/programming/odbc/build",
+  "command": "/usr/bin/c++    -o CMakeFiles/main.dir/main.cpp.o -c /home/devooty/programming/odbc/main.cpp",
+  "file": "/home/devooty/programming/odbc/main.cpp",
+  "output": "CMakeFiles/main.dir/main.cpp.o"
+}
+]
