@@ -13,5 +13,11 @@ int main() {
 		exit(status);
 	}
 
+	sqlite3_stmt *stmt;
+
+	const char* create_tables = "asdfsadf";
+
+	std::cout << create_tables << std::endl;
+
 	sqlite3_close(db);
 }
