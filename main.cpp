@@ -1,5 +1,5 @@
-#include <cstdlib>
 #include <sys/stat.h>
+#include <cstring>
 #include <iostream>
 #include <fstream>
 #include "sqlite/sqlite3.h"
@@ -17,16 +17,23 @@ int main() {
 
 	if(open_status != SQLITE_OK){
 		std::cout << "failed to open database!" << std::endl;
-		exit(open_status);
+		std::exit(open_status);
 	}
 
 	if(!db_exists){
-		std::ifstream ifs; //work here
+		std::ifstream ifs; 
 		ifs.open("../sqlite/initialize_db.sql", std::ifstream::in);
-		if(ifs.bad()){
+		if(!ifs.is_open()){
 			std::cerr << "IO Stream Error!" << std::endl;
-			exit();
+			std::exit(-1);
 		};
+
+		ifs.seekg(0, ifs.end);
+		int length = ifs.tellg();
+		ifs.seekg(0, ifs.beg);
+
+		char *buffer = new char[length];
+		ifs.read(buffer, length); //continue work here!
 	}
 
 	sqlite3_close(db);
