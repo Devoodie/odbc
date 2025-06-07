@@ -40,8 +40,25 @@ int main() {
 		if(!ifs) {
 			std::cerr << "Stream read error!" << std::endl;
 			std::exit(-1);
+		} else {
+			std::cout << "Initialization file successfully read!" << std::endl;
 		}
-		sqlite3_prepare_v2(db, buffer, -1, &stmt, NULL);
+		
+		int rc = sqlite3_prepare_v2(db, buffer, -1, &stmt, NULL); 
+		if(rc != SQLITE_OK){
+			std::cerr << "SQLITE prepare error: " << rc << "!" << std::endl;
+			std::exit(rc);
+		} else {
+			std::cout << "SQL statement prepared!" << std::endl;
+		}
+
+		sqlite3_step(stmt);
+		sqlite3_step(stmt);
+		sqlite3_finalize(stmt);
+		std::cout << "Database Initialization Complete!" << std::endl;
+
+	} else {
+		std::cout << "Database Detected!" << std::endl;
 	}
 
 	sqlite3_close(db);

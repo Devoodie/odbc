@@ -1,5 +1,3 @@
-.open database.db
-
 CREATE TABLE users(
 	ID INTEGER PRIMARY KEY AUTOINCREMENT,
 	user_name varchar,
