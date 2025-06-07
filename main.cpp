@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <sys/stat.h>
 #include <cstring>
 #include <iostream>
@@ -34,6 +35,13 @@ int main() {
 
 		char *buffer = new char[length];
 		ifs.read(buffer, length); //continue work here!
+		ifs.close();
+
+		if(!ifs) {
+			std::cerr << "Stream read error!" << std::endl;
+			std::exit(-1);
+		}
+		sqlite3_prepare_v2(db, buffer, -1, &stmt, NULL);
 	}
 
 	sqlite3_close(db);
