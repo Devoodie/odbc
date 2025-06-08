@@ -4,7 +4,6 @@ CREATE TABLE users(
 	first_name varchar,
 	last_name varchar
 );
-
 CREATE TABLE resources(
 	vm_id INTEGER,
 	vm_name varchar,
