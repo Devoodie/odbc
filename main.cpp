@@ -35,8 +35,9 @@ int main() {
 			std::exit(-1);
 		};
 
-		while(ifs.peek() != EOF) {
-			std::string statement;
+		std::string statement;
+
+		while(!ifs.eofbit) {
 			std::getline(ifs, statement, ';');
 			statement.append(";");
 			if(!ifs) {
