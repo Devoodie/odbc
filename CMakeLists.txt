@@ -4,7 +4,7 @@ PROJECT(ODBC)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-include_directories("./sqlite")
+include_directories("./sqlite" "./include")
 add_library(sqlite3 STATIC "./sqlite/sqlite3.c")
 
 add_executable(main "./main.cpp")
