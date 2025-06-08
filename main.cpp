@@ -36,9 +36,9 @@ int main() {
 		};
 
 		std::string statement;
+		std::getline(ifs, statement, ';');
 
-		while(!ifs.eofbit) {
-			std::getline(ifs, statement, ';');
+		while(!ifs.eof()) {
 			statement.append(";");
 			if(!ifs) {
 				std::cerr << "Stream read error!" << std::endl;
@@ -66,6 +66,7 @@ int main() {
 				std::exit(rc);
 			}
 			sqlite3_finalize(stmt);
+			std::getline(ifs, statement, ';');
 		}
 		std::cout << "Database Initialization Complete!" << std::endl;
 	} else {
