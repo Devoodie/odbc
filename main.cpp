@@ -25,10 +25,11 @@ int main() {
 
 	if(!db_exists){
 		initialization::initialize_database(db, stmt, db_path);
-		std::cout << "Database Initialization Complete!" << std::endl;
+		std::cout << blue << "Database Initialization Complete!" << clear << std::endl;
 	} else {
-		std::cout << "Existing database Detected!" << std::endl;
+		std::cout << blue << "Existing database Detected!" << clear << std::endl;
 	}
+
 
 	sqlite3_close(db);
 }
