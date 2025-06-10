@@ -2,11 +2,15 @@
 #include <cstdio>
 #include <cstring>
 #include <iostream>
+#include <boost/asio.hpp>
 #include "include/initialization.h"
+
 
 const char* db_path = "../sqlite/database.db";
 
+using namespace boost;
 int main() {
+	//initialize sqlite db
 	sqlite3 *db;
 	sqlite3_stmt *stmt;
 	int rc; //return code
@@ -30,6 +34,11 @@ int main() {
 		std::cout << blue << "Existing database Detected!" << clear << std::endl;
 	}
 
+	//initialize boost context
+
+	system::error_code boost_error;
+	asio::io_context io_context;
+	asio::ip::tcp::socket socket(io_context);
 
 	sqlite3_close(db);
 }
