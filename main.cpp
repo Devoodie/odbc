@@ -37,6 +37,7 @@ int main() {
 
 	system::error_code boost_error;
 	asio::io_context io_context;
+	tcp::socket socket(io_context);
 	tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), 8080));
 
 	sqlite3_close(db);
