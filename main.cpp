@@ -2,6 +2,7 @@
 #include <iostream>
 #include <boost/asio.hpp>
 #include "include/initialization.h"
+#include "include/http_utils.h"
 
 
 const char* db_path = "../sqlite/database.db";
@@ -35,10 +36,9 @@ int main() {
 
 	//initialize boost asio 
 
-	system::error_code boost_error;
 	asio::io_context io_context;
-	tcp::socket socket(io_context);
-	tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), 8080));
+
+	handlers::http_handler handler(io_context);
 
 	sqlite3_close(db);
 }
