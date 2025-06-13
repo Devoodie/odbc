@@ -1,6 +1,7 @@
 #include <sys/stat.h>
 #include <iostream>
 #include <boost/asio.hpp>
+#include <boost/bind/bind.hpp>
 #include "include/initialization.h"
 #include "include/http_utils.h"
 
@@ -39,6 +40,14 @@ int main() {
 	asio::io_context io_context;
 	boost::system::error_code ec;
 	handlers::http_handler handler(io_context);
+
+
+	try {
+		handler.listen(ec);
+		io_context.run();
+	} catch(std::exception err) {
+		std::cout << err.what() << std::endl;
+	}
 
 	sqlite3_close(db);
 }
