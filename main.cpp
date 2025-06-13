@@ -37,7 +37,7 @@ int main() {
 	//initialize boost asio 
 
 	asio::io_context io_context;
-
+	boost::system::error_code ec;
 	handlers::http_handler handler(io_context);
 
 	sqlite3_close(db);
