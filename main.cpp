@@ -1,3 +1,5 @@
+#include <boost/asio/registered_buffer.hpp>
+#include <boost/asio/write.hpp>
 #include <sys/stat.h>
 #include <iostream>
 #include <boost/asio.hpp>
@@ -37,17 +39,29 @@ int main() {
 
 	//initialize boost asio 
 
+	try {
 	asio::io_context io_context;
 	boost::system::error_code ec;
-	handlers::http_handler handler(io_context);
+//	handlers::http_handler handler(io_context);
+	tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), 8085));
 
+	std::string read_buffer;
 
-	try {
-		handler.listen(ec);
-		io_context.run();
-	} catch(std::exception err) {
-		std::cout << err.what() << std::endl;
+	tcp::socket socket(io_context);
+	acceptor.accept(socket);
+
+	std::string write_buffer = "HTTP/1.1 200 OK\nContent\nContent-Type: text/html; charset=UTF-8\nConnection: Closed\n\n<html><h1>Hello World! </h1></html>\n";
+
+	asio::write(socket, boost::asio::buffer(write_buffer), ec);
+
+	int bytes_read = asio::read(socket, asio::buffer(read_buffer));
+	std::cout << bytes_read << " bytes read!\n" << read_buffer << std::endl;
+	std::cout << read_buffer << std::endl;
+
+	} catch (std::exception& e) {
+		std::cerr << e.what() << std::endl;
 	}
+
 
 	sqlite3_close(db);
 }
