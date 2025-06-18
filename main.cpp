@@ -7,6 +7,7 @@
 #include <boost/beast.hpp>
 #include "include/initialization.h"
 #include "include/http_utils.h"
+#include "sqlite/sqlite3.h"
 
 
 const char* db_path = "../sqlite/database.db";
@@ -39,11 +40,26 @@ int main() {
 		std::cout << blue << "Existing database Detected!" << clear << std::endl;
 	}
 
+	std::string insert_test = "INSERT INTO users (user_name, first_name, last_name)\nVALUES('Devooty','test','another_test');";
+
+	rc = sqlite3_prepare_v2(db, insert_test.c_str(), -1, &stmt, NULL);
+
+	if(rc != SQLITE_OK){
+		std::cerr << red << "PREPARE FAILURE: " << rc << clear << std::endl;
+		std::exit(rc);
+	} else {
+		std::cout << "Prepare success!\n";
+		rc = sqlite3_step(stmt);
+		if(rc != SQLITE_DONE) std::cout << yellow << "Insert unsuccessful: " << rc << clear << std::endl;
+	}
+
+
 	//initialize boost asio 
 
 	asio::io_context io_context;
 	boost::system::error_code ec;
 	tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), 8085));
+
 	boost::beast::flat_buffer read_buffer;
 	http::request<http::string_body> request;
 
@@ -55,13 +71,15 @@ int main() {
 
 		auto iterator = request.begin();
 
+		std::cout << request.method_string() << "\n";
 		while(iterator != request.end()){
 			std::cout << iterator->name_string() << ": " << iterator->value() << "\n";
 			iterator++;
-		}
+		} 
+		std::cout << std::endl;
 
 	} catch (std::exception& e) {
-		std::cerr << e.what() << std::endl;
+		std::cerr << red << e.what() << clear << std::endl;
 	}
 
 	sqlite3_close(db);
