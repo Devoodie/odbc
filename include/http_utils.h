@@ -1,22 +1,19 @@
 #include <boost/asio.hpp>
+#include <boost/beast.hpp>
+#include <boost/beast/http.hpp>
 
+
+using namespace boost::asio;
+using namespace boost::beast;
 namespace handlers {
-
-	class http_handler{
-		public:
-			boost::asio::ip::tcp::socket socket;
-			boost::asio::io_context &io_context;
-			boost::asio::ip::tcp::acceptor acceptor;
-			std::string read_buffer;
+	struct http_handler{
+			flat_buffer read_buffer;
 			std::string write_buffer;
+			http::request<http::string_body> request;
 
-			http_handler(boost::asio::io_context &io_context_) : 
-				io_context(io_context_), socket(io_context_), 
-				acceptor(io_context_, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 8085)){};
-
-			void listen(boost::system::error_code &ec);
-			void handle_http(boost::system::error_code &ec);
-			void read_http(boost::system::error_code &ec);
 	};
 
+	void handle_connection(ip::tcp::socket &socket, boost::system::error_code ec);
+
+	void http_get(std::string_view url, http::response<http::string_body> &response);
 }

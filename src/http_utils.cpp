@@ -1,32 +1,40 @@
 #include <iostream>
-#include "../include/http_utils.h"
+#include <fstream>
 #include <boost/asio.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/bind/bind.hpp>
+#include <boost/beast/http.hpp>
+#include "../include/http_utils.h"
+#include "../include/terminal_colors.h"
 
-void handlers::http_handler::listen(boost::system::error_code &ec){
-	if(!ec){
-//		this->acceptor.async_accept(this->socket, boost::bind(&handlers::http_handler::handle_http, this, ec));
-		this->acceptor.accept(this->socket);
-		this->handle_http(ec);
+void handle_connection(ip::tcp::socket &socket, boost::system::error_code &ec){
+
+	handlers::http_handler handler = {};
+	http::read(socket, handler.read_buffer, handler.request, ec);
+
+	if(handler.request.method_string() == "GET"){}
+	else if(handler.request.method_string() == "POST"){};
+};
+
+void http_get(std::string_view url, http::response<http::string_body> &response){
+	char *body;
+	std::string path = ".";
+	path.append(url);
+	int length = 0;
+
+	std::ifstream file_stream;
+	file_stream.open(path.c_str());
+
+	if(!file_stream.good()){
+		std::cerr << red << "Unable to open file: " << url << "\n" << "STREAM STATUS: " <<  file_stream.badbit << clear << std::endl;
+		return;
 	}
+
+	//continue work here
+	response.body() = 
+td::cout << "Reading " << length << " characters... ";
+    // read data as
+	file_stream.close();
+
 }
 
-void handlers::http_handler::handle_http(boost::system::error_code &ec){
-	if(!ec){
-		if(this->socket.is_open()){
-			std::cout << "Socket is open!\n";
-		} else {
-			std::cout << "Socket is closed!\n";
-		}
-		std::size_t bytes_read = boost::asio::read(this->socket, boost::asio::buffer(this->read_buffer, 4096));
-		std::cout << bytes_read << " bytes read!" << std::endl;
-		std::cout << this->read_buffer << std::endl;
-	}
-}
-
-void handlers::http_handler::read_http(boost::system::error_code &ec){
-	if(!ec){
-		std::cout << this->read_buffer << std::endl;
-	}
-}
