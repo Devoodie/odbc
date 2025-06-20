@@ -24,6 +24,7 @@ void handlers::handle_connection(ip::tcp::socket &socket, boost::system::error_c
 
 void handlers::http_get(std::string_view url, http::response<http::string_body> &response){
 	char *body;
+	int length = 0;
 	std::string path = ".";
 	path.append(url);
 
@@ -31,7 +32,6 @@ void handlers::http_get(std::string_view url, http::response<http::string_body> 
 		path.append("index.html");
 	}
 
-	int length = 0;
 
 	std::ifstream file_stream;
 	file_stream.open(path.c_str());
@@ -64,5 +64,6 @@ void handlers::http_get(std::string_view url, http::response<http::string_body> 
 	response.set(http::field::content_type, "text/html");
 	response.content_length(length);
 	response.body() = body;
+	delete[] body; //don't forget to free memory
 }
 
