@@ -61,22 +61,13 @@ int main() {
 	tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), 8085));
 
 	boost::beast::flat_buffer read_buffer;
-	http::request<http::string_body> request;
 
 	try {
 		tcp::socket socket(io_context);
-		acceptor.accept(socket);
-
-		http::read(socket, read_buffer, request, ec);
-
-		auto iterator = request.begin();
-
-		std::cout << request.method_string() << "\n";
-		while(iterator != request.end()){
-			std::cout << iterator->name_string() << ": " << iterator->value() << "\n";
-			iterator++;
-		} 
-		std::cout << std::endl;
+		while(true){
+			acceptor.accept(socket);
+			handlers::handle_connection(socket, ec);
+		}
 
 	} catch (std::exception& e) {
 		std::cerr << red << e.what() << clear << std::endl;

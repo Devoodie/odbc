@@ -10,10 +10,10 @@ namespace handlers {
 			flat_buffer read_buffer;
 			std::string write_buffer;
 			http::request<http::string_body> request;
-
+			http::response<http::string_body> response;
 	};
 
-	void handle_connection(ip::tcp::socket &socket, boost::system::error_code ec);
+	void handle_connection(ip::tcp::socket &socket, boost::system::error_code &ec);
 
 	void http_get(std::string_view url, http::response<http::string_body> &response);
 }
