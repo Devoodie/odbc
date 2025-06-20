@@ -1,3 +1,4 @@
+#include <boost/beast/core/file.hpp>
 #include <iostream>
 #include <fstream>
 #include <boost/asio.hpp>
@@ -28,12 +29,26 @@ void http_get(std::string_view url, http::response<http::string_body> &response)
 	if(!file_stream.good()){
 		std::cerr << red << "Unable to open file: " << url << "\n" << "STREAM STATUS: " <<  file_stream.badbit << clear << std::endl;
 		return;
+	} else {
+		std::cout << blue << "Retrieving: " << url << std::endl;
 	}
 
-	//continue work here
-	response.body() = 
-td::cout << "Reading " << length << " characters... ";
-    // read data as
+	file_stream.seekg(0, file_stream.end);
+	length = file_stream.tellg();
+	file_stream.seekg(0, file_stream.beg);
+
+	body = new char[length];
+
+	file_stream.read(body, length);
+
+	if(!file_stream.good()){ 
+		std::cerr << red << "STREAM READ ERROR: " << file_stream.badbit << clear << std::endl;
+		return;
+	}
+	//continue fillin out response
+	response.base().result(200);
+	response.body() = body;
+
 	file_stream.close();
 
 }
