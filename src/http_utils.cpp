@@ -25,11 +25,17 @@ void handlers::handle_connection(ip::tcp::socket &socket, boost::system::error_c
 void handlers::http_get(std::string_view url, http::response<http::string_body> &response){
 	char *body;
 	int length = 0;
-	std::string path = ".";
+	std::string path = "./frontend";
 	path.append(url);
 
 	if(url == "/"){
 		path.append("index.html");
+	}
+	if(url == "/output.css"){
+		response.set(http::field::content_type, "text/css");
+
+	} else {
+		response.set(http::field::content_type, "text/html");
 	}
 
 
@@ -61,7 +67,6 @@ void handlers::http_get(std::string_view url, http::response<http::string_body> 
 	//continue fillin out response
 	response.base().result(200);
 	response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-	response.set(http::field::content_type, "text/html");
 	response.content_length(length);
 	response.body() = body;
 	delete[] body; //don't forget to free memory
