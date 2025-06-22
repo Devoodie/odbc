@@ -4,19 +4,22 @@
 	  <meta charset="UTF-8">
 	  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	  <link href="./output.css" rel="stylesheet">
+	  <script src="https://unpkg.com/hyperscript.org@0.9.14"></script>
   </head>
   <body class = "dark:bg-neutral-800">
-	  <div class="grid absolute h-screen w-screen bg-neutral-700/80 z-5 place-content-center">
+	  <div id="modal" class="grid absolute h-screen w-screen bg-neutral-700/80 z-5 place-content-center" _="on closeModal remove me">
 		  <div class="bg-neutral-500 h-54 w-96 rounded-sm shadow-lg">
 			  <div class="h-8 border-b border-sky-500">
-				  <p class="text-sky-500 pt-1 pl-4">Login</p>
+				  <p class="text-sky-500 pt-1 pl-4">Craftvisor Login</p>
 			  </div>
 			  <div class="flex place-content-center">
-				  <form>
-					  <label for="username">Username: </label><input id="username" type="text"><br>
-					  <label for="password">Password: </label><input id="password" type="text"><br>
-
+				  <form class="grid place-content-center">
+					  <label for="username">Username: </label><input id="username" class="border-2 border-black rounded-sm shadow-lg"type="text"><br>
+					  <label for="password">Password: </label><input id="password" class="border-2 border-black rounded-sm shadow-lg"type="text"><br>
 				  </form>
+			  </div>
+			  <div class="relative h-8 border-t border-sky-500">
+				  <button class="absolute inset-y-0 right-4 px-3  rounded-full bg-sky-500 text-white hover:bg-sky-300" _="on click trigger closeModal">Login</button>
 			  </div>
 		  </div>
 	  </div>
