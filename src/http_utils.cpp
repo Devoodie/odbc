@@ -18,7 +18,10 @@ void handlers::handle_connection(ip::tcp::socket &socket, boost::system::error_c
 		handlers::http_get(handler.request.target(), handler.response);
 		http::write(socket, handler.response, ec);
 	}
-	else if(handler.request.method() == http::verb::post){};
+	else if(handler.request.method() == http::verb::post){
+		std::cout << yellow << "Post detected: " << handler.request.target() << std::endl;
+		std::cout << handler.request.body() << clear << std::endl;
+	};
 	socket.close();
 };
 
