@@ -16,4 +16,7 @@ namespace handlers {
 	void handle_connection(ip::tcp::socket &socket, boost::system::error_code &ec);
 
 	void http_get(std::string_view url, http::response<http::string_body> &response);
+
+	void http_post(std::string_view url, http::response<http::string_body> &response, const char* body);
+
 }

@@ -19,8 +19,7 @@ void handlers::handle_connection(ip::tcp::socket &socket, boost::system::error_c
 		http::write(socket, handler.response, ec);
 	}
 	else if(handler.request.method() == http::verb::post){
-		std::cout << yellow << "Post detected: " << handler.request.target() << std::endl;
-		std::cout << handler.request.body() << clear << std::endl;
+		http_post(handler.request.target(), handler.response, handler.request.body().c_str());
 	};
 	socket.close();
 };
@@ -74,4 +73,41 @@ void handlers::http_get(std::string_view url, http::response<http::string_body> 
 	response.body() = body;
 	delete[] body; //don't forget to free memory
 }
+
+void http_post(std::string_view url, http::response<http::string_body> &response, const char* body){
+	std::cout << blue << "Posting: " << url << clear << std::endl;
+	if(url == "/login"){
+		std::string username;
+		std::string password;
+		std::string field;
+		std::string value;
+		bool field_or_val = 1;
+
+		for(int i = 0; i < std::strlen(body); ++i){
+			if(body[i] == '=') {
+				field_or_val ^= 1;
+			} else if(body[i] == '&' or i == std::strlen(body) - 1) {
+
+				if(field == "username"){
+					username = value;
+				} else if(field == "password"){
+					password = value;
+				} else {
+					std::cerr << red << "NO VALID FIELD FOUND: " << field << clear << std::endl;
+				}
+
+				field = "";
+				value = "";
+				field_or_val ^= 1;
+
+			} else if(field_or_val) {
+				field += body[i];
+			} else {
+				value += body[i];
+			}
+		}
+		//query database
+	}
+}
+
 
