@@ -19,7 +19,7 @@ void handlers::handle_connection(ip::tcp::socket &socket, boost::system::error_c
 		http::write(socket, handler.response, ec);
 	}
 	else if(handler.request.method() == http::verb::post){
-		http_post(handler.request.target(), handler.response, handler.request.body().c_str());
+		handlers::http_post(handler.request.target(), handler.response, handler.request.body().c_str());
 	};
 	socket.close();
 };
@@ -74,7 +74,7 @@ void handlers::http_get(std::string_view url, http::response<http::string_body> 
 	delete[] body; //don't forget to free memory
 }
 
-void http_post(std::string_view url, http::response<http::string_body> &response, const char* body){
+void handlers::http_post(std::string_view url, http::response<http::string_body> &response, const char* body){
 	std::cout << blue << "Posting: " << url << clear << std::endl;
 	if(url == "/login"){
 		std::string username;
