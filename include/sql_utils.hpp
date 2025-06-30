@@ -1,6 +1,5 @@
 #include <vector>
-#include <memory>
-#include <string_view>
+#include <iostream>
 #include <boost/uuid/uuid.hpp>
 #include <inja.hpp>
 #include "../sqlite/sqlite3.h"
@@ -10,7 +9,7 @@ namespace sql_utils{
 	struct query_handler{
 		sqlite3 *db;
 		sqlite3_stmt *stmt;
-		int sqlite_rc;
+		int rc;
 		string table;
 		vector<string> keys;
 		vector<string> values;
@@ -19,5 +18,6 @@ namespace sql_utils{
 
 	void GetUserSession(query_handler &sql_handler);
 
-	std::string query_db(query_handler sql_handler); 
+	//prepares query
+	void query_db(query_handler &sql_handler); 
 }
