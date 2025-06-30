@@ -18,6 +18,10 @@ namespace handlers {
 
 	void http_get(std::string_view url, http::response<http::string_body> &response);
 
-	void http_post(std::string_view url, http::response<http::string_body> &response, const char* body, sql_utils::query_handler sql_handler);
+	void http_post(std::string_view url, http::response<http::string_body> &response, const char* body, sql_utils::query_handler &sql_handler);
 
+}
+
+namespace endpoints {
+	void login(const char* body, sql_utils::query_handler &sql_handler);
 }

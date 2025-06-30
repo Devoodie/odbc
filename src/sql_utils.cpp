@@ -1,7 +1,7 @@
 #include "../include/sql_utils.hpp"
 #include "../include/terminal_colors.h"
 
-std::string sql_utils::query_db(sql_utils::query_handler sql_handler, std::vector<std::string> keys, std::vector<std::string> values){
+std::string sql_utils::query_db(sql_utils::query_handler sql_handler){
 	inja::Environment env;
 	inja::json query_params;
 
@@ -10,14 +10,14 @@ std::string sql_utils::query_db(sql_utils::query_handler sql_handler, std::vecto
 
 	std::string query;
 
-	for(int i = 0; i < sql_handler.columns->size(); ++i){
+	for(int i = 0; i < sql_handler.columns.size(); ++i){
 		select_columns.append(sql_handler.columns[i]);
-		if(i != sql_handler.columns->size() - 1) select_columns.append(", ");
+		if(i != sql_handler.columns.size() - 1) select_columns.append(", ");
 	}
 
-	for(int i = 0; i < keys.size(); ++i){	
-		where_clause.append(keys[i] + "=" + values[i]);
-		if(i != keys.size() - 1) where_clause.append(", ");
+	for(int i = 0; i < sql_handler.keys.size(); ++i){	
+		where_clause.append(sql_handler.keys[i] + "=" + sql_handler.values[i]);
+		if(i != sql_handler.keys.size() - 1) where_clause.append(", ");
 	}
 
 	query_params["columns"] = select_columns;
@@ -28,5 +28,5 @@ std::string sql_utils::query_db(sql_utils::query_handler sql_handler, std::vecto
 
 	std::cout << yellow << query << clear << std::endl;
 
-	return where_clause;
+	return query;
 }

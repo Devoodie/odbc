@@ -20,6 +20,7 @@ void handlers::handle_connection(ip::tcp::socket &socket, sql_utils::query_handl
 		http::write(socket, handler.response, ec);
 	}
 	else if(handler.request.method() == http::verb::post){
+		std::cout << yellow << "BODY:\n" << handler.request.body().c_str() << clear << std::endl;
 		handlers::http_post(handler.request.target(), handler.response, handler.request.body().c_str(), sql_handler);
 	};
 	socket.close();
@@ -75,15 +76,22 @@ void handlers::http_get(std::string_view url, http::response<http::string_body> 
 	delete[] body; //don't forget to free memory
 }
 
-void handlers::http_post(std::string_view url, http::response<http::string_body> &response, const char* body, sql_utils::query_handler sql_handler){
+void handlers::http_post(std::string_view url, http::response<http::string_body> &response, const char* body, sql_utils::query_handler &sql_handler){
 	std::cout << blue << "Posting: " << url << clear << std::endl;
 	if(url == "/login"){
+		endpoints::login(body, sql_handler);
+	}
+}
+
+void endpoints::login(const char *body, sql_utils::query_handler &sql_handler){
 		std::string field;
 		std::string value;
 		bool field_or_val = 1;
 
-		std::vector<std::string> keys = {"username", "password"};
-		std::vector<std::string> values(2);
+		sql_handler.keys = {"username", "password"};
+		sql_handler.values = std::vector<std::string>(2);
+		sql_handler.table = "users";
+		sql_handler.columns = {"username", "password"};
 
 		//consider using regular expression for this 
 		for(int i = 0; i < std::strlen(body); ++i){
@@ -92,9 +100,9 @@ void handlers::http_post(std::string_view url, http::response<http::string_body>
 			} else if(body[i] == '&' or i == std::strlen(body) - 1) {
 
 				if(field == "username"){
-					values[0] = value;
+					sql_handler.values[0] = value;
 				} else if(field == "password"){
-					values[1] = value;
+					sql_handler.values[1] = value;
 				} else {
 					std::cerr << red << "NO VALID FIELD FOUND: " << field << clear << std::endl;
 				}
@@ -109,8 +117,5 @@ void handlers::http_post(std::string_view url, http::response<http::string_body>
 				value += body[i];
 			}
 		}
-		//query database
-	}
+		sql_utils::query_db(sql_handler);
 }
-
-

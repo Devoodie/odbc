@@ -17,16 +17,15 @@ using namespace boost::asio::ip;
 using namespace boost::beast;
 int main() {
 	//initialize sqlite db
-	sqlite3 *db;
-	sqlite3_stmt *stmt;
-	int rc; //return code
+
+	sql_utils::query_handler sql_handler = {};
 
 	struct stat buffer;
 	bool db_exists;
 	
 	db_exists = !stat(db_path, &buffer);
 
-	int open_status = sqlite3_open(db_path, &db);
+	int open_status = sqlite3_open(db_path, &sql_handler.db);
 
 	if(open_status != SQLITE_OK){
 		std::cout << "failed to open database!" << std::endl;
@@ -34,7 +33,7 @@ int main() {
 	}
 
 	if(!db_exists){
-		initialization::initialize_database(db, stmt, db_path);
+		initialization::initialize_database(sql_handler.db, sql_handler.stmt, db_path);
 		std::cout << blue << "Database Initialization Complete!" << clear << std::endl;
 	} else {
 		std::cout << blue << "Existing database Detected!" << clear << std::endl;
@@ -42,15 +41,15 @@ int main() {
 
 	std::string insert_test = "INSERT INTO users (user_name, first_name, last_name)\nVALUES('Devooty','test','another_test');";
 
-	rc = sqlite3_prepare_v2(db, insert_test.c_str(), -1, &stmt, NULL);
+	sql_handler.sqlite_rc = sqlite3_prepare_v2(sql_handler.db, insert_test.c_str(), -1, &sql_handler.stmt, NULL);
 
-	if(rc != SQLITE_OK){
-		std::cerr << red << "PREPARE FAILURE: " << rc << clear << std::endl;
-		std::exit(rc);
+	if(sql_handler.sqlite_rc != SQLITE_OK){
+		std::cerr << red << "PREPARE FAILURE: " << sql_handler.sqlite_rc << clear << std::endl;
+		std::exit(sql_handler.sqlite_rc);
 	} else {
 		std::cout << "Prepare success!\n";
-		rc = sqlite3_step(stmt);
-		if(rc != SQLITE_DONE) std::cout << yellow << "Insert unsuccessful: " << rc << clear << std::endl;
+		sql_handler.sqlite_rc = sqlite3_step(sql_handler.stmt);
+		if(sql_handler.sqlite_rc != SQLITE_DONE) std::cout << yellow << "Insert unsuccessful: " << sql_handler.sqlite_rc<< clear << std::endl;
 	}
 
 
@@ -66,12 +65,12 @@ int main() {
 		tcp::socket socket(io_context);
 		while(true){
 			acceptor.accept(socket);
-			handlers::handle_connection(socket, ec);
+			handlers::handle_connection(socket, sql_handler, ec);
 		}
 
 	} catch (std::exception& e) {
 		std::cerr << red << e.what() << clear << std::endl;
 	}
 
-	sqlite3_close(db);
+	sqlite3_close(sql_handler.db);
 }

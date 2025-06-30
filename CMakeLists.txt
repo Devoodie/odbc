@@ -14,5 +14,5 @@ add_executable(main "./main.cpp")
 set_property(TARGET http_utils PROPERTY CXX_STANDARD 17)
 set_property(TARGET main PROPERTY CXX_STANDARD 17)
 
-
+target_link_libraries(http_utils sql_utils)
 target_link_libraries(main sqlite3 http_utils)
