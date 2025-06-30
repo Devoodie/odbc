@@ -6,7 +6,8 @@
 #include <boost/asio/read.hpp>
 #include <boost/bind/bind.hpp>
 #include <boost/beast/http.hpp>
-#include "../include/http_utils.h"
+#include "../include/http_utils.hpp"
+#include "../include/sql_utils.hpp"
 #include "../include/terminal_colors.h"
 
 void handlers::handle_connection(ip::tcp::socket &socket, boost::system::error_code &ec){
