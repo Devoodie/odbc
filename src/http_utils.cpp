@@ -1,16 +1,16 @@
-#include <boost/beast/core/file.hpp>
-#include <boost/beast/http/write.hpp>
 #include <iostream>
 #include <fstream>
+#include <vector>
+#include <boost/beast/core/file.hpp>
+#include <boost/beast/http/write.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/bind/bind.hpp>
 #include <boost/beast/http.hpp>
 #include "../include/http_utils.hpp"
-#include "../include/sql_utils.hpp"
 #include "../include/terminal_colors.h"
 
-void handlers::handle_connection(ip::tcp::socket &socket, boost::system::error_code &ec){
+void handlers::handle_connection(ip::tcp::socket &socket, sql_utils::query_handler &sql_handler, boost::system::error_code &ec){
 
 	handlers::http_handler handler = {};
 	http::read(socket, handler.read_buffer, handler.request, ec);
@@ -20,7 +20,7 @@ void handlers::handle_connection(ip::tcp::socket &socket, boost::system::error_c
 		http::write(socket, handler.response, ec);
 	}
 	else if(handler.request.method() == http::verb::post){
-		handlers::http_post(handler.request.target(), handler.response, handler.request.body().c_str());
+		handlers::http_post(handler.request.target(), handler.response, handler.request.body().c_str(), sql_handler);
 	};
 	socket.close();
 };
@@ -75,24 +75,26 @@ void handlers::http_get(std::string_view url, http::response<http::string_body> 
 	delete[] body; //don't forget to free memory
 }
 
-void handlers::http_post(std::string_view url, http::response<http::string_body> &response, const char* body){
+void handlers::http_post(std::string_view url, http::response<http::string_body> &response, const char* body, sql_utils::query_handler sql_handler){
 	std::cout << blue << "Posting: " << url << clear << std::endl;
 	if(url == "/login"){
-		std::string username;
-		std::string password;
 		std::string field;
 		std::string value;
 		bool field_or_val = 1;
 
+		std::vector<std::string> keys = {"username", "password"};
+		std::vector<std::string> values(2);
+
+		//consider using regular expression for this 
 		for(int i = 0; i < std::strlen(body); ++i){
 			if(body[i] == '=') {
 				field_or_val ^= 1;
 			} else if(body[i] == '&' or i == std::strlen(body) - 1) {
 
 				if(field == "username"){
-					username = value;
+					values[0] = value;
 				} else if(field == "password"){
-					password = value;
+					values[1] = value;
 				} else {
 					std::cerr << red << "NO VALID FIELD FOUND: " << field << clear << std::endl;
 				}

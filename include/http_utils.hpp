@@ -1,6 +1,7 @@
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
 #include <boost/beast/http.hpp>
+#include "sql_utils.hpp"
 
 
 using namespace boost::asio;
@@ -13,10 +14,10 @@ namespace handlers {
 			http::response<http::string_body> response;
 	};
 
-	void handle_connection(ip::tcp::socket &socket, boost::system::error_code &ec);
+	void handle_connection(ip::tcp::socket &socket, sql_utils::query_handler &sql_handler, boost::system::error_code &ec);
 
 	void http_get(std::string_view url, http::response<http::string_body> &response);
 
-	void http_post(std::string_view url, http::response<http::string_body> &response, const char* body);
+	void http_post(std::string_view url, http::response<http::string_body> &response, const char* body, sql_utils::query_handler sql_handler);
 
 }
