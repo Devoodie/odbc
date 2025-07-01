@@ -17,7 +17,7 @@ void sql_utils::query_db(sql_utils::query_handler &sql_handler){
 
 	for(int i = 0; i < sql_handler.keys.size(); ++i){	
 		where_clause.append(sql_handler.keys[i] + "=" + sql_handler.values[i]);
-		if(i != sql_handler.keys.size() - 1) where_clause.append(", ");
+		if(i != sql_handler.keys.size() - 1) where_clause.append(" AND ");
 	}
 
 	query_params["columns"] = select_columns;
@@ -36,21 +36,31 @@ void sql_utils::query_db(sql_utils::query_handler &sql_handler){
 	}
 }
 
-void sql_utils::GetUserSession(query_handler &sql_handler){
+int sql_utils::GetUserSession(query_handler &sql_handler){
 	sql_utils::query_db(sql_handler);
-	if(sql_handler.rc != SQLITE_OK) return;
+	if(sql_handler.rc != SQLITE_OK) return sql_handler.rc;
 
 	sql_handler.rc = sqlite3_step(sql_handler.stmt);
 
 	switch(sql_handler.rc){
 		case SQLITE_ROW:
-			//continue work here
-
-			std::string db_username = std::dynamic_cast<char*>(sqlite3_column_text(sql_handler.stmt, 0));
-			std::string db_password = std::dynamic_cast<char*>(sqlite3_column_text(sql_handler.stmt, 1));
-			break;
+			{
+				//continue work here
+				std::string db_username = reinterpret_cast<const char*>(sqlite3_column_text(sql_handler.stmt, 0));
+				std::string db_password = reinterpret_cast<const char*>(sqlite3_column_text(sql_handler.stmt, 1));
+				std::cout << "Password: "  << db_password << std::endl;
+				std::cout << "Password: " << db_password << std::endl;
+				return 0;
+			}
+		case SQLITE_DONE:
+			{
+				std::cout << red << "INVALID LOGIN!" << clear << std::endl;
+				return 3;
+			}
 		default:
-			std::cerr << red << "Unknown Error Code: " << sql_handler.rc << clear << std::endl;
-			return;
+			{
+				std::cerr << red << "Unknown Error Code: " << sql_handler.rc << clear << std::endl;
+				return 1;
+			}
 	}
 }

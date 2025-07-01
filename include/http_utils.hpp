@@ -23,5 +23,5 @@ namespace handlers {
 }
 
 namespace endpoints {
-	void login(const char* body, sql_utils::query_handler &sql_handler);
+	void login(const char* body, http::response<http::string_body> &response, sql_utils::query_handler &sql_handler);
 }

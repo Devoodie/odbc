@@ -2,7 +2,8 @@ CREATE TABLE users(
 	ID INTEGER PRIMARY KEY AUTOINCREMENT,
 	user_name varchar,
 	first_name varchar,
-	last_name varchar
+	last_name varchar,
+	password varchar
 );
 CREATE TABLE resources(
 	vm_id INTEGER,

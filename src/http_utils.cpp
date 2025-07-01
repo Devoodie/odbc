@@ -22,6 +22,7 @@ void handlers::handle_connection(ip::tcp::socket &socket, sql_utils::query_handl
 	else if(handler.request.method() == http::verb::post){
 		std::cout << yellow << "BODY:\n" << handler.request.body().c_str() << clear << std::endl;
 		handlers::http_post(handler.request.target(), handler.response, handler.request.body().c_str(), sql_handler);
+		http::write(socket, handler.response, ec);
 	};
 	socket.close();
 };
@@ -79,30 +80,30 @@ void handlers::http_get(std::string_view url, http::response<http::string_body> 
 void handlers::http_post(std::string_view url, http::response<http::string_body> &response, const char* body, sql_utils::query_handler &sql_handler){
 	std::cout << blue << "Posting: " << url << clear << std::endl;
 	if(url == "/login"){
-		endpoints::login(body, sql_handler);
+		endpoints::login(body, response, sql_handler);
 	}
 }
 
-void endpoints::login(const char *body, sql_utils::query_handler &sql_handler){
+void endpoints::login(const char *body, http::response<http::string_body> &response, sql_utils::query_handler &sql_handler){
 		std::string field;
 		std::string value;
 		bool field_or_val = 1;
 
-		sql_handler.keys = {"username", "password"};
+		sql_handler.keys = {"user_name", "password"};
 		sql_handler.values = std::vector<std::string>(2);
 		sql_handler.table = "users";
-		sql_handler.columns = {"username", "password"};
+		sql_handler.columns = {"user_name", "password"};
 
 		//consider using regular expression for this 
 		for(int i = 0; i < std::strlen(body); ++i){
 			if(body[i] == '=') {
 				field_or_val ^= 1;
 			} else if(body[i] == '&' or i == std::strlen(body) - 1) {
-
+				if(i == std::strlen(body) - 1) value += body[i];
 				if(field == "username"){
-					sql_handler.values[0] = value;
+					sql_handler.values[0] = "'"+ value + "'";
 				} else if(field == "password"){
-					sql_handler.values[1] = value;
+					sql_handler.values[1] = "'" + value + "'";
 				} else {
 					std::cerr << red << "NO VALID FIELD FOUND: " << field << clear << std::endl;
 				}
@@ -118,4 +119,15 @@ void endpoints::login(const char *body, sql_utils::query_handler &sql_handler){
 			}
 		}
 		sql_utils::query_db(sql_handler);
+		int good = sql_utils::GetUserSession(sql_handler);
+
+		if(good == 0){
+			std::cout << blue << "Authenticated!" << clear << std::endl;
+			response.body() = "";
+			response.base().result(200);
+			response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+			response.content_length(0);
+		} else {
+			//servemodal!
+		}
 }
