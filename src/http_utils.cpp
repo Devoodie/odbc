@@ -101,7 +101,7 @@ void endpoints::login(const char *body, http::response<http::string_body> &respo
 			} else if(body[i] == '&' or i == std::strlen(body) - 1) {
 				if(i == std::strlen(body) - 1) value += body[i];
 				if(field == "username"){
-					sql_handler.values[0] = "'"+ value + "'";
+					sql_handler.values[0] = "'" + value + "'";
 				} else if(field == "password"){
 					sql_handler.values[1] = "'" + value + "'";
 				} else {
@@ -128,6 +128,6 @@ void endpoints::login(const char *body, http::response<http::string_body> &respo
 			response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
 			response.content_length(0);
 		} else {
-			//servemodal!
+
 		}
 }
