@@ -48,8 +48,6 @@ int sql_utils::GetUserSession(query_handler &sql_handler){
 				//continue work here
 				std::string db_username = reinterpret_cast<const char*>(sqlite3_column_text(sql_handler.stmt, 0));
 				std::string db_password = reinterpret_cast<const char*>(sqlite3_column_text(sql_handler.stmt, 1));
-				std::cout << "Password: "  << db_password << std::endl;
-				std::cout << "Password: " << db_password << std::endl;
 				return 0;
 			}
 		case SQLITE_DONE:

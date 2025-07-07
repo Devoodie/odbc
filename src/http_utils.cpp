@@ -17,13 +17,12 @@ void handlers::handle_connection(ip::tcp::socket &socket, sql_utils::query_handl
 
 	if(handler.request.method() == http::verb::get){
 		handlers::http_get(handler.request.target(), handler.response);
-		http::write(socket, handler.response, ec);
 	}
 	else if(handler.request.method() == http::verb::post){
 		std::cout << yellow << "BODY:\n" << handler.request.body().c_str() << clear << std::endl;
 		handlers::http_post(handler.request.target(), handler.response, handler.request.body().c_str(), sql_handler);
-		http::write(socket, handler.response, ec);
 	};
+		http::write(socket, handler.response, ec);
 	socket.close();
 };
 
@@ -118,6 +117,7 @@ void endpoints::login(const char *body, http::response<http::string_body> &respo
 				value += body[i];
 			}
 		}
+
 		sql_utils::query_db(sql_handler);
 		int good = sql_utils::GetUserSession(sql_handler);
 
@@ -128,6 +128,27 @@ void endpoints::login(const char *body, http::response<http::string_body> &respo
 			response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
 			response.content_length(0);
 		} else {
+			fstream modal("../templates/modal.html");
+			if(modal.is_open()){
+				// it would be nice if i could just read directly into the response body
+				modal.seekg(0, modal.end);
+				int length = modal.tellg();
+				modal.seekg(0, modal.beg);
+				char *buffer = new char[length];
 
+				response.body() = *buffer;
+				response.base().result(401);
+				modal.read(buffer, length);
+				response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+				response.content_length(length);
+
+				std::cout << *buffer << std::endl;
+				modal.close();
+				delete[] buffer;
+			} else {
+				std::cerr << red << "ERROR READING TEMPLATE: modal.html!" << clear << std::endl;
+				return;
+			}
+			std::cout << "DENIED!" << clear << std::endl;
 		}
 }
