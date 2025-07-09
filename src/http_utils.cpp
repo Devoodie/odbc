@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <argon2.h>
 #include <boost/beast/core/file.hpp>
 #include <boost/beast/http/write.hpp>
 #include <boost/asio.hpp>

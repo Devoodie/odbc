@@ -39,20 +39,6 @@ int main() {
 		std::cout << blue << "Existing database Detected!" << clear << std::endl;
 	}
 
-	std::string insert_test = "INSERT INTO users (user_name, first_name, last_name)\nVALUES('Devooty','test','another_test');";
-
-	sql_handler.rc = sqlite3_prepare_v2(sql_handler.db, insert_test.c_str(), -1, &sql_handler.stmt, NULL);
-
-	if(sql_handler.rc != SQLITE_OK){
-		std::cerr << red << "PREPARE FAILURE: " << sql_handler.rc << clear << std::endl;
-		std::exit(sql_handler.rc);
-	} else {
-		std::cout << "Prepare success!\n";
-		sql_handler.rc = sqlite3_step(sql_handler.stmt);
-		if(sql_handler.rc != SQLITE_DONE) std::cout << yellow << "Insert unsuccessful: " << sql_handler.rc<< clear << std::endl;
-	}
-
-
 	//initialize boost asio 
 
 	asio::io_context io_context;

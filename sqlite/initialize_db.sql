@@ -3,7 +3,7 @@ CREATE TABLE users(
 	user_name varchar,
 	first_name varchar,
 	last_name varchar,
-	password varchar
+	hash varchar
 );
 CREATE TABLE resources(
 	vm_id INTEGER,
