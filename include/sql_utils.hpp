@@ -16,7 +16,7 @@ namespace sql_utils{
 		vector<string> columns;
 	};
 
-	int GetUserSession(query_handler &sql_handler);
+	int GetUserSession(query_handler &sql_handler, string_view password);
 
 	//prepares query
 	void query_db(query_handler &sql_handler); 

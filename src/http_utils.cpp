@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <argon2.h>
 #include <boost/beast/core/file.hpp>
 #include <boost/beast/http/write.hpp>
 #include <boost/asio.hpp>
@@ -89,10 +88,12 @@ void endpoints::login(const char *body, http::response<http::string_body> &respo
 		std::string value;
 		bool field_or_val = 1;
 
-		sql_handler.keys = {"user_name", "password"};
-		sql_handler.values = std::vector<std::string>(2);
+		sql_handler.keys = {"user_name"};
+		sql_handler.values = std::vector<std::string>(1);
 		sql_handler.table = "users";
-		sql_handler.columns = {"user_name", "password"};
+		sql_handler.columns = {"user_name", "hash", "salt"};
+
+		std::string password;
 
 		//consider using regular expression for this 
 		for(int i = 0; i < std::strlen(body); ++i){
@@ -103,7 +104,7 @@ void endpoints::login(const char *body, http::response<http::string_body> &respo
 				if(field == "username"){
 					sql_handler.values[0] = "'" + value + "'";
 				} else if(field == "password"){
-					sql_handler.values[1] = "'" + value + "'";
+					password = value;
 				} else {
 					std::cerr << red << "NO VALID FIELD FOUND: " << field << clear << std::endl;
 				}
