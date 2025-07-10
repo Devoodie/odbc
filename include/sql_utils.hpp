@@ -5,6 +5,7 @@
 #include "../sqlite/sqlite3.h"
 
 using namespace std;
+
 namespace sql_utils{
 	struct query_handler{
 		sqlite3 *db;
@@ -16,7 +17,7 @@ namespace sql_utils{
 		vector<string> columns;
 	};
 
-	int GetUserSession(query_handler &sql_handler, string_view password);
+	int GetUserSession(query_handler &sql_handler, string password);
 
 	//prepares query
 	void query_db(query_handler &sql_handler); 

@@ -62,9 +62,9 @@ int sql_utils::GetUserSession(query_handler &sql_handler, std::string password){
 				uint8_t db_salt[SALTLEN];
 				uint8_t calculated_hash[HASHLEN];
 
-				std::copy(salt_ptr, salt_ptr + (sizeof(uint8_t) * SALTLEN), std::begin(db_salt));
+				std::copy(salt_ptr, salt_ptr + SALTLEN, std::begin(db_salt));
 
-				argon2d_hash_raw(t_cost, m_cost, parallelism, password.c_str(), password.length(), db_salt, calculated_hash, HASHLEN);
+				argon2d_hash_raw(t_cost, m_cost, parallelism, password.c_str(), password.length(), db_salt, SALTLEN, calculated_hash, HASHLEN);
 
 				return 0;
 			}

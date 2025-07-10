@@ -121,7 +121,7 @@ void endpoints::login(const char *body, http::response<http::string_body> &respo
 		}
 
 		sql_utils::query_db(sql_handler);
-		int good = sql_utils::GetUserSession(sql_handler);
+		int good = sql_utils::GetUserSession(sql_handler, password);
 
 		if(good == 0){
 			std::cout << blue << "Authenticated!" << clear << std::endl;
