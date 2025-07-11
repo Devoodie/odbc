@@ -11,6 +11,7 @@ constexpr uint32_t parallelism = 1;
 //prepares query for processing
 void sql_utils::query_db(sql_utils::query_handler &sql_handler){
 	inja::Environment env;
+	env.set_html_autoescape(true);
 	inja::json query_params;
 
 	std::string select_columns;
@@ -56,7 +57,7 @@ int sql_utils::GetUserSession(query_handler &sql_handler, std::string password){
 				//continue work here
 	
 				//get the has from the db along with the salt
-				const uint8_t *db_hash = sqlite3_column_text(sql_handler.stmt, 1);
+				const uint8_t *db_hash = (uint8_t*)sqlite3_column_blob(sql_handler.stmt, 1);
 				const uint8_t *salt_ptr = sqlite3_column_text(sql_handler.stmt, 2);
 				
 				uint8_t db_salt[SALTLEN];
@@ -65,6 +66,14 @@ int sql_utils::GetUserSession(query_handler &sql_handler, std::string password){
 				std::copy(salt_ptr, salt_ptr + SALTLEN, std::begin(db_salt));
 
 				argon2d_hash_raw(t_cost, m_cost, parallelism, password.c_str(), password.length(), db_salt, SALTLEN, calculated_hash, HASHLEN);
+
+				std::cout << blue <<"DB_HASH: "  << db_hash <<  "\n" << "CALCULATED HASH: " << calculated_hash << clear << std::endl;
+
+				for(int i = 0; i < HASHLEN; ++i){
+					if(calculated_hash[i] != db_hash[i]){
+						return 1;
+					}
+				}
 
 				return 0;
 			}
