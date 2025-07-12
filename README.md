@@ -13,7 +13,7 @@
 - It is expected by cmake that you have <a href="https://github.com/pantor/inja">inja</a> and its <a href="https://github.com/nlohmann/json/releases">dependencies</a>, nlohmann/json installed system include locations.
     - *Note: Be sure to copy the nlohmann directory, from single includes, into the system includes directory.*
 - Follow the installation instructions for <a href="https://github.com/P-H-C/phc-winner-argon2">argon</a> to ensure proper compilation.
-### file structure
+### Project Structure
 ```
 --root
    --sqlite
@@ -23,3 +23,7 @@
    --include
    --src
 ```
+### System Requirements
+- GNU/LINUX Distrobution
+- C++ 17 Compatible Compiler
+- CMAKE version <= 3.10
