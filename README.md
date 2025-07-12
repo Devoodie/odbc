@@ -26,4 +26,4 @@
 ### System Requirements
 - GNU/LINUX Distrobution
 - C++ 17 Compatible Compiler
-- CMAKE version <= 3.10
+- CMAKE version >= 3.10
