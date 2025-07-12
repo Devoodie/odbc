@@ -91,7 +91,7 @@ void endpoints::login(const char *body, http::response<http::string_body> &respo
 		sql_handler.keys = {"user_name"};
 		sql_handler.values = std::vector<std::string>(1);
 		sql_handler.table = "users";
-		sql_handler.columns = {"user_name", "hash", "salt"};
+		sql_handler.columns = {"user_name", "hash", "salt", "ID"};
 
 		std::string password;
 

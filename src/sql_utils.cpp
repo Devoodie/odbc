@@ -1,6 +1,7 @@
 #include "../include/sql_utils.hpp"
 #include "../include/terminal_colors.h"
 #include "argon2.h"
+#include <boost/uuid/uuid_io.hpp>
 #define HASHLEN 32
 #define SALTLEN 16 
 
@@ -71,9 +72,26 @@ int sql_utils::GetUserSession(query_handler &sql_handler, std::string password){
 
 				for(int i = 0; i < HASHLEN; ++i){
 					if(calculated_hash[i] != db_hash[i]){
+						sqlite3_finalize(sql_handler.stmt);
 						return 1;
 					}
 				}
+				//create session use boost uuid 
+			
+				int user_id = sqlite3_column_int(sql_handler.stmt, 3);
+				sqlite3_finalize(sql_handler.stmt);
+
+				boost::uuids::random_generator gen;
+				boost::uuids::uuid uuid = gen();
+
+				//wonder what the performance difference will be compared to storing as blob
+				std::string session = boost::uuids::to_string(uuid);
+
+				//continue work here --prepare an insert into session table
+				sqlite3_prepare_v2(sql_handler.db, "INSERT", -1, &sql_handler.stmt, NULL);
+
+				//use ctime to insert an expiration date
+				//write session to cookie in response header
 
 				return 0;
 			}

@@ -1,6 +1,7 @@
 #include <vector>
 #include <iostream>
-#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/random_generator.hpp>
+#include <boost/uuid.hpp>
 #include <inja.hpp>
 #include "../sqlite/sqlite3.h"
 
