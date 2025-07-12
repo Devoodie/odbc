@@ -121,9 +121,10 @@ void endpoints::login(const char *body, http::response<http::string_body> &respo
 		}
 
 		sql_utils::query_db(sql_handler);
-		int good = sql_utils::GetUserSession(sql_handler, password);
+		int bad = sql_utils::GetUserSession(sql_handler, password);
 
-		if(good == 0){
+		if(!bad){
+			// write session cookie to client 
 			std::cout << blue << "Authenticated!" << clear << std::endl;
 			response.body() = "";
 			response.base().result(200);

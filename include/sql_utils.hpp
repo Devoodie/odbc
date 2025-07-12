@@ -1,8 +1,5 @@
 #include <vector>
 #include <iostream>
-#include <boost/uuid/random_generator.hpp>
-#include <boost/uuid.hpp>
-#include <inja.hpp>
 #include "../sqlite/sqlite3.h"
 
 using namespace std;
@@ -22,4 +19,6 @@ namespace sql_utils{
 
 	//prepares query
 	void query_db(query_handler &sql_handler); 
+
+	int insert_db(query_handler &sql_handler);
 }

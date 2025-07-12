@@ -1,7 +1,11 @@
-#include "../include/sql_utils.hpp"
-#include "../include/terminal_colors.h"
 #include "argon2.h"
 #include <boost/uuid/uuid_io.hpp>
+#include <boost/uuid/random_generator.hpp>
+#include <boost/uuid.hpp>
+#include <inja.hpp>
+#include "../include/sql_utils.hpp"
+#include "../include/terminal_colors.h"
+
 #define HASHLEN 32
 #define SALTLEN 16 
 
@@ -9,7 +13,7 @@ constexpr uint32_t t_cost = 2;
 constexpr uint32_t m_cost = 1<<16;
 constexpr uint32_t parallelism = 1;
 
-//prepares query for processing
+//prepares select query for processing
 void sql_utils::query_db(sql_utils::query_handler &sql_handler){
 	inja::Environment env;
 	env.set_html_autoescape(true);
@@ -34,7 +38,7 @@ void sql_utils::query_db(sql_utils::query_handler &sql_handler){
 	query_params["table"] = sql_handler.table;
 	query_params["where"] = where_clause;
 
-	query = env.render_file("../templates/query.sql", query_params);
+	query = env.render_file("../templates/select.sql", query_params);
 
 	std::cout << yellow << "QUERY:\n" << query << clear << std::endl;
 
@@ -46,6 +50,50 @@ void sql_utils::query_db(sql_utils::query_handler &sql_handler){
 	}
 }
 
+int sql_utils::insert_db(sql_utils::query_handler &sql_handler){
+	inja::Environment env;
+	env.set_html_autoescape(true);
+	inja::json query_params;
+
+	std::string insert_columns;
+	std::string values;
+
+	std::string query;
+
+	for(int i = 0; i < sql_handler.columns.size(); ++i){
+		insert_columns.append(sql_handler.columns[i]);
+		if(i != sql_handler.columns.size() - 1) insert_columns.append(", ");
+	}
+
+	for(int i = 0; i < sql_handler.keys.size(); ++i){	
+		values.append(sql_handler.values[i]);
+		if(i != sql_handler.keys.size() - 1) values.append(", ");
+	}
+
+	query_params["columns"] = insert_columns;
+	query_params["table"] = sql_handler.table;
+	query_params["values"] = values;
+
+	query = env.render_file("../templates/insert.sql", query_params);
+
+	std::cout << yellow << "QUERY:\n" << query << clear << std::endl;
+
+	sql_handler.rc = sqlite3_prepare_v2(sql_handler.db, query.c_str(), -1, &sql_handler.stmt, NULL);
+
+	if(sql_handler.rc != SQLITE_OK){
+		std::cerr << red << "SQL PREPARE ERROR: " << sql_handler.rc << clear << std::endl;
+	}
+
+	sql_handler.rc = sqlite3_step(sql_handler.stmt);
+
+	if(sql_handler.rc != SQLITE_DONE){
+		std::cerr << red << "SQL INSERTION ERROR: " << sql_handler.rc << clear << std::endl;
+	}
+
+	return sql_handler.rc;
+};
+
+//Continue Work Here need to find a valid way to return session cookie while maintaining verbose error codes
 int sql_utils::GetUserSession(query_handler &sql_handler, std::string password){
 	sql_utils::query_db(sql_handler);
 	if(sql_handler.rc != SQLITE_OK) return sql_handler.rc;
@@ -76,7 +124,6 @@ int sql_utils::GetUserSession(query_handler &sql_handler, std::string password){
 						return 1;
 					}
 				}
-				//create session use boost uuid 
 			
 				int user_id = sqlite3_column_int(sql_handler.stmt, 3);
 				sqlite3_finalize(sql_handler.stmt);
@@ -87,18 +134,27 @@ int sql_utils::GetUserSession(query_handler &sql_handler, std::string password){
 				//wonder what the performance difference will be compared to storing as blob
 				std::string session = boost::uuids::to_string(uuid);
 
-				//continue work here --prepare an insert into session table
-				sqlite3_prepare_v2(sql_handler.db, "INSERT", -1, &sql_handler.stmt, NULL);
-
 				//use ctime to insert an expiration date
-				//write session to cookie in response header
+				uint32_t expiration = time(NULL);
+
+				sql_handler.table = "sessions";
+
+				sql_handler.keys.clear();
+				sql_handler.values.clear();
+				sql_handler.columns.clear();
+
+				sql_handler.columns = {"user_id", "session_token", "expiration"};
+				sql_handler.values = { std::to_string(user_id), session, std::to_string(expiration)};
+				sql_utils::insert_db(sql_handler);
+
+				sqlite3_finalize(sql_handler.stmt);
 
 				return 0;
 			}
 		case SQLITE_DONE:
 			{
 				std::cout << red << "INVALID LOGIN!" << clear << std::endl;
-				return 3;
+				return 1;
 			}
 		default:
 			{

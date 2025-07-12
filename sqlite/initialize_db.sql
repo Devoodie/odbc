@@ -1,4 +1,4 @@
-;
+CREATE TABLE users(
 	ID integer PRIMARY KEY AUTOINCREMENT,
 	user_name varchar,
 	first_name varchar,
