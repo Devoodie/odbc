@@ -94,7 +94,7 @@ int sql_utils::insert_db(sql_utils::query_handler &sql_handler){
 };
 
 //Continue Work Here need to find a valid way to return session cookie while maintaining verbose error codes
-int sql_utils::GetUserSession(query_handler &sql_handler, std::string password){
+int sql_utils::GetUserSession(query_handler &sql_handler, http::response<http::string_body> &response, std::string password){
 	sql_utils::query_db(sql_handler);
 	if(sql_handler.rc != SQLITE_OK) return sql_handler.rc;
 
@@ -103,9 +103,7 @@ int sql_utils::GetUserSession(query_handler &sql_handler, std::string password){
 	switch(sql_handler.rc){
 		case SQLITE_ROW:
 			{
-				//continue work here
-	
-				//get the has from the db along with the salt
+				//get the hash from the db along with the salt
 				const uint8_t *db_hash = (uint8_t*)sqlite3_column_blob(sql_handler.stmt, 1);
 				const uint8_t *salt_ptr = sqlite3_column_text(sql_handler.stmt, 2);
 				
@@ -134,7 +132,6 @@ int sql_utils::GetUserSession(query_handler &sql_handler, std::string password){
 				//wonder what the performance difference will be compared to storing as blob
 				std::string session = boost::uuids::to_string(uuid);
 
-				//use ctime to insert an expiration date
 				uint32_t expiration = time(NULL);
 
 				sql_handler.table = "sessions";
@@ -149,6 +146,8 @@ int sql_utils::GetUserSession(query_handler &sql_handler, std::string password){
 
 				sqlite3_finalize(sql_handler.stmt);
 
+				std::string cookie = "session_token=" + session + ";" + "SameSite=Strict; Max-Age=120";
+				response.set(http::field::set_cookie, cookie);
 				return 0;
 			}
 		case SQLITE_DONE:

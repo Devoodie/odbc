@@ -1,3 +1,4 @@
+#include <boost/beast/http/message_fwd.hpp>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -121,7 +122,7 @@ void endpoints::login(const char *body, http::response<http::string_body> &respo
 		}
 
 		sql_utils::query_db(sql_handler);
-		int bad = sql_utils::GetUserSession(sql_handler, password);
+		int bad = sql_utils::GetUserSession(sql_handler, response, password);
 
 		if(!bad){
 			// write session cookie to client 
