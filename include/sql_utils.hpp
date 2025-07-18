@@ -1,7 +1,7 @@
 #include <vector>
 #include <iostream>
-#include "../sqlite/sqlite3.h"
 #include <boost/beast.hpp>
+#include "../sqlite/sqlite3.h"
 
 using namespace std;
 using namespace boost::beast;
@@ -18,6 +18,8 @@ namespace sql_utils{
 	};
 
 	int GetUserSession(query_handler &sql_handler, http::response<http::string_body> &response, string password);
+
+	bool CheckSession(query_handler &sql_handler, std::string_view cookie);
 
 	//prepares query
 	void query_db(query_handler &sql_handler); 

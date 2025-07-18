@@ -1,7 +1,7 @@
 #include "argon2.h"
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/random_generator.hpp>
-#include <boost/uuid.hpp>
+#include <boost/uuid/uuid.hpp>
 #include <inja.hpp>
 #include "../include/sql_utils.hpp"
 #include "../include/terminal_colors.h"
@@ -93,7 +93,6 @@ int sql_utils::insert_db(sql_utils::query_handler &sql_handler){
 	return sql_handler.rc;
 };
 
-//Continue Work Here need to find a valid way to return session cookie while maintaining verbose error codes
 int sql_utils::GetUserSession(query_handler &sql_handler, http::response<http::string_body> &response, std::string password){
 	sql_utils::query_db(sql_handler);
 	if(sql_handler.rc != SQLITE_OK) return sql_handler.rc;
@@ -161,4 +160,23 @@ int sql_utils::GetUserSession(query_handler &sql_handler, http::response<http::s
 				return 1;
 			}
 	}
+}
+
+// save the query!
+bool sql_utils::CheckSession(query_handler &sql_handler, std::string_view cookie){
+	//query db
+	sql_handler.keys.clear();
+	sql_handler.values.clear();
+	sql_handler.columns.clear();
+
+	sql_handler.keys = {"session_token"};
+	sql_handler.columns = {"user_id", "session_token", "expiration"};
+	sql_handler.table = "sessions"; 
+
+	//parse session token 
+
+	std::cout << yellow << cookie << clear << std::endl;
+	sql_utils::query_db(sql_handler);
+	
+	return true;
 }

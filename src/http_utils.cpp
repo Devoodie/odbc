@@ -1,4 +1,3 @@
-#include <boost/beast/http/message_fwd.hpp>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -17,13 +16,15 @@ void handlers::handle_connection(ip::tcp::socket &socket, sql_utils::query_handl
 	http::read(socket, handler.read_buffer, handler.request, ec);
 
 	if(handler.request.method() == http::verb::get){
+		//authenticate
+//		sql_utils::CheckSession(sql_handler, handler.request[http::field::cookie]);
 		handlers::http_get(handler.request.target(), handler.response);
 	}
 	else if(handler.request.method() == http::verb::post){
 		std::cout << yellow << "BODY:\n" << handler.request.body().c_str() << clear << std::endl;
 		handlers::http_post(handler.request.target(), handler.response, handler.request.body().c_str(), sql_handler);
 	};
-		http::write(socket, handler.response, ec);
+	http::write(socket, handler.response, ec);
 	socket.close();
 };
 
@@ -38,11 +39,9 @@ void handlers::http_get(std::string_view url, http::response<http::string_body> 
 	}
 	if(url == "/output.css"){
 		response.set(http::field::content_type, "text/css");
-
 	} else {
 		response.set(http::field::content_type, "text/html");
 	}
-
 
 	std::ifstream file_stream;
 	file_stream.open(path.c_str());
@@ -125,7 +124,6 @@ void endpoints::login(const char *body, http::response<http::string_body> &respo
 		int bad = sql_utils::GetUserSession(sql_handler, response, password);
 
 		if(!bad){
-			// write session cookie to client 
 			std::cout << blue << "Authenticated!" << clear << std::endl;
 			response.body() = "";
 			response.base().result(200);
@@ -134,7 +132,6 @@ void endpoints::login(const char *body, http::response<http::string_body> &respo
 		} else {
 			fstream modal("../templates/modal.html");
 			if(modal.is_open()){
-				// it would be nice if i could just read directly into the response body
 				modal.seekg(0, modal.end);
 				int length = modal.tellg();
 				modal.seekg(0, modal.beg);
