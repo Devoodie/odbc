@@ -17,7 +17,8 @@ void handlers::handle_connection(ip::tcp::socket &socket, sql_utils::query_handl
 
 	if(handler.request.method() == http::verb::get){
 		//authenticate
-//		sql_utils::CheckSession(sql_handler, handler.request[http::field::cookie]);
+		std::string cookie = handler.request[http::field::cookie];
+		sql_utils::CheckSession(sql_handler, cookie);
 		handlers::http_get(handler.request.target(), handler.response);
 	}
 	else if(handler.request.method() == http::verb::post){

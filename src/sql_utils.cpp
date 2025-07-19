@@ -2,6 +2,7 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid.hpp>
+#include <cassert>
 #include <inja.hpp>
 #include "../include/sql_utils.hpp"
 #include "../include/terminal_colors.h"
@@ -16,13 +17,15 @@ constexpr uint32_t parallelism = 1;
 //prepares select query for processing
 void sql_utils::query_db(sql_utils::query_handler &sql_handler){
 	inja::Environment env;
-	env.set_html_autoescape(true);
+//	env.set_html_autoescape(true);
 	inja::json query_params;
 
 	std::string select_columns;
 	std::string where_clause = "WHERE ";
 
 	std::string query;
+
+	assert(sql_handler.keys.size() == sql_handler.values.size());
 
 	for(int i = 0; i < sql_handler.columns.size(); ++i){
 		select_columns.append(sql_handler.columns[i]);
@@ -52,7 +55,7 @@ void sql_utils::query_db(sql_utils::query_handler &sql_handler){
 
 int sql_utils::insert_db(sql_utils::query_handler &sql_handler){
 	inja::Environment env;
-	env.set_html_autoescape(true);
+//	env.set_html_autoescape(true);
 	inja::json query_params;
 
 	std::string insert_columns;
@@ -65,9 +68,9 @@ int sql_utils::insert_db(sql_utils::query_handler &sql_handler){
 		if(i != sql_handler.columns.size() - 1) insert_columns.append(", ");
 	}
 
-	for(int i = 0; i < sql_handler.keys.size(); ++i){	
+	for(int i = 0; i < sql_handler.values.size(); ++i){	
 		values.append(sql_handler.values[i]);
-		if(i != sql_handler.keys.size() - 1) values.append(", ");
+		if(i != sql_handler.values.size() - 1) values.append(", ");
 	}
 
 	query_params["columns"] = insert_columns;
@@ -140,7 +143,7 @@ int sql_utils::GetUserSession(query_handler &sql_handler, http::response<http::s
 				sql_handler.columns.clear();
 
 				sql_handler.columns = {"user_id", "session_token", "expiration"};
-				sql_handler.values = { std::to_string(user_id), session, std::to_string(expiration)};
+				sql_handler.values = { std::to_string(user_id), "'" + session + "'", std::to_string(expiration)};
 				sql_utils::insert_db(sql_handler);
 
 				sqlite3_finalize(sql_handler.stmt);
@@ -163,7 +166,7 @@ int sql_utils::GetUserSession(query_handler &sql_handler, http::response<http::s
 }
 
 // save the query!
-bool sql_utils::CheckSession(query_handler &sql_handler, std::string_view cookie){
+bool sql_utils::CheckSession(query_handler &sql_handler, std::string cookie){
 	//query db
 	sql_handler.keys.clear();
 	sql_handler.values.clear();
@@ -174,7 +177,7 @@ bool sql_utils::CheckSession(query_handler &sql_handler, std::string_view cookie
 	sql_handler.table = "sessions"; 
 
 	//parse session token 
-
+	// put parsed token in values vector 
 	std::cout << yellow << cookie << clear << std::endl;
 	sql_utils::query_db(sql_handler);
 	

@@ -19,7 +19,7 @@ namespace sql_utils{
 
 	int GetUserSession(query_handler &sql_handler, http::response<http::string_body> &response, string password);
 
-	bool CheckSession(query_handler &sql_handler, std::string_view cookie);
+	bool CheckSession(query_handler &sql_handler, std::string cookie);
 
 	//prepares query
 	void query_db(query_handler &sql_handler); 
