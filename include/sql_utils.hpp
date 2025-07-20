@@ -17,6 +17,12 @@ namespace sql_utils{
 		vector<string> columns;
 	};
 
+	struct session{
+		int id;
+		string uuid;
+		uint32_t expiration;
+	};
+
 	int GetUserSession(query_handler &sql_handler, http::response<http::string_body> &response, string password);
 
 	bool CheckSession(query_handler &sql_handler, std::string cookie);

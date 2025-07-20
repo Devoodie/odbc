@@ -19,7 +19,7 @@ void handlers::handle_connection(ip::tcp::socket &socket, sql_utils::query_handl
 		//authenticate
 		std::string cookie = handler.request[http::field::cookie];
 		sql_utils::CheckSession(sql_handler, cookie);
-		handlers::http_get(handler.request.target(), handler.response);
+		handlers::http_get(handler, sql_handler);
 	}
 	else if(handler.request.method() == http::verb::post){
 		std::cout << yellow << "BODY:\n" << handler.request.body().c_str() << clear << std::endl;
@@ -27,9 +27,11 @@ void handlers::handle_connection(ip::tcp::socket &socket, sql_utils::query_handl
 	};
 	http::write(socket, handler.response, ec);
 	socket.close();
-};
+}
 
-void handlers::http_get(std::string_view url, http::response<http::string_body> &response){
+void handlers::http_get(handlers::http_handler &http_handler, sql_utils::query_handler &sql_handler){
+
+	std::string url = http_handler.request.target();
 	char *body;
 	int length = 0;
 	std::string path = "./frontend";
@@ -39,9 +41,9 @@ void handlers::http_get(std::string_view url, http::response<http::string_body> 
 		path.append("index.html");
 	}
 	if(url == "/output.css"){
-		response.set(http::field::content_type, "text/css");
+		http_handler.response.set(http::field::content_type, "text/css");
 	} else {
-		response.set(http::field::content_type, "text/html");
+		http_handler.response.set(http::field::content_type, "text/html");
 	}
 
 	std::ifstream file_stream;
@@ -69,11 +71,10 @@ void handlers::http_get(std::string_view url, http::response<http::string_body> 
 
 	file_stream.close();
 
-	//continue fillin out response
-	response.base().result(200);
-	response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-	response.content_length(length);
-	response.body() = body;
+	http_handler.response.base().result(200);
+	http_handler.response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+	http_handler.response.content_length(length);
+	http_handler.response.body() = body;
 	delete[] body; //don't forget to free memory
 }
 
@@ -153,4 +154,9 @@ void endpoints::login(const char *body, http::response<http::string_body> &respo
 			}
 			std::cout << "DENIED!" << clear << std::endl;
 		}
+}
+
+//finish routing
+void endpoints::route(std::string &endpoint){
+	if()
 }

@@ -167,7 +167,7 @@ int sql_utils::GetUserSession(query_handler &sql_handler, http::response<http::s
 
 // save the query!
 bool sql_utils::CheckSession(query_handler &sql_handler, std::string cookie){
-	//query db
+
 	sql_handler.keys.clear();
 	sql_handler.values.clear();
 	sql_handler.columns.clear();
@@ -176,10 +176,19 @@ bool sql_utils::CheckSession(query_handler &sql_handler, std::string cookie){
 	sql_handler.columns = {"user_id", "session_token", "expiration"};
 	sql_handler.table = "sessions"; 
 
-	//parse session token 
-	// put parsed token in values vector 
-	std::cout << yellow << cookie << clear << std::endl;
+	bool appending = 0;
+	std::string token;
+
+	for(int i = 0; i < cookie.size(); ++i){
+		if(appending) token += cookie[i];
+		if(cookie[i] == '=') appending = 1;
+	}
+
+	sql_handler.values.push_back(token);
+
+	std::cout << yellow << token << clear << std::endl;
 	sql_utils::query_db(sql_handler);
-	
+
+	sqlite3_step(sql_handler.stmt);
 	return true;
 }
