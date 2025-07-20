@@ -30,7 +30,6 @@ void handlers::handle_connection(ip::tcp::socket &socket, sql_utils::query_handl
 }
 
 void handlers::http_get(handlers::http_handler &http_handler, sql_utils::query_handler &sql_handler){
-
 	std::string url = http_handler.request.target();
 	char *body;
 	int length = 0;
@@ -45,37 +44,17 @@ void handlers::http_get(handlers::http_handler &http_handler, sql_utils::query_h
 	} else {
 		http_handler.response.set(http::field::content_type, "text/html");
 	}
+	//check if null
+	body = endpoints::open_file(path, length);
 
-	std::ifstream file_stream;
-	file_stream.open(path.c_str());
-
-	if(!file_stream.good()){
-		std::cerr << red << "Unable to open file: " << url << "\n" << "STREAM STATUS: " <<  file_stream.badbit << clear << std::endl;
-		return;
-	} else {
-		std::cout << blue << "Retrieving: " << url << clear << std::endl;
+	if(body == nullptr){ 
+		body = new char[1];
 	}
-
-	file_stream.seekg(0, file_stream.end);
-	length = file_stream.tellg();
-	file_stream.seekg(0, file_stream.beg);
-
-	body = new char[length];
-
-	file_stream.read(body, length);
-
-	if(!file_stream.good()){ 
-		std::cerr << red << "STREAM READ ERROR: " << file_stream.badbit << clear << std::endl;
-		return;
-	}
-
-	file_stream.close();
-
 	http_handler.response.base().result(200);
 	http_handler.response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
 	http_handler.response.content_length(length);
 	http_handler.response.body() = body;
-	delete[] body; //don't forget to free memory
+	delete[] body;
 }
 
 void handlers::http_post(std::string_view url, http::response<http::string_body> &response, const char* body, sql_utils::query_handler &sql_handler){
@@ -158,5 +137,35 @@ void endpoints::login(const char *body, http::response<http::string_body> &respo
 
 //finish routing
 void endpoints::route(std::string &endpoint){
-	if()
+	if(false);
+}
+
+char* endpoints::open_file(std::string path, int &length){
+	char* file;
+	std::ifstream file_stream;
+	file_stream.open(path.c_str());
+
+	if(!file_stream.good()){
+		std::cerr << red << "Unable to open file: " << path << "\n" << "STREAM STATUS: " <<  file_stream.badbit << clear << std::endl;
+		return nullptr;
+	} else {
+		std::cout << blue << "Retrieving: " << path << clear << std::endl;
+	}
+
+	file_stream.seekg(0, file_stream.end);
+	length = file_stream.tellg();
+	file_stream.seekg(0, file_stream.beg);
+
+	file = new char[length];
+
+	file_stream.read(file, length);
+
+	if(!file_stream.good()){ 
+		std::cerr << red << "STREAM READ ERROR: " << file_stream.badbit << clear << std::endl;
+		return nullptr;
+	}
+
+	file_stream.close();
+
+	return file; 
 }

@@ -25,4 +25,6 @@ namespace endpoints {
 	void login(const char* body, http::response<http::string_body> &response, sql_utils::query_handler &sql_handler);
 
 	void route(std::string &endpoint);
+
+	char* open_file(std::string path, int &length);
 }

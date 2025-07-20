@@ -166,8 +166,9 @@ int sql_utils::GetUserSession(query_handler &sql_handler, http::response<http::s
 }
 
 // save the query!
+// checking the session should renew expiration if its valid
 bool sql_utils::CheckSession(query_handler &sql_handler, std::string cookie){
-
+// add token expiration renewal
 	sql_handler.keys.clear();
 	sql_handler.values.clear();
 	sql_handler.columns.clear();
@@ -184,11 +185,27 @@ bool sql_utils::CheckSession(query_handler &sql_handler, std::string cookie){
 		if(cookie[i] == '=') appending = 1;
 	}
 
-	sql_handler.values.push_back(token);
+	sql_handler.values.push_back("'"+ token + "'");
 
 	std::cout << yellow << token << clear << std::endl;
 	sql_utils::query_db(sql_handler);
 
-	sqlite3_step(sql_handler.stmt);
+	sql_handler.rc = sqlite3_step(sql_handler.stmt);
+
+	if(sql_handler.rc != SQLITE_ROW){
+		std::cout << red << "SESSION TOKEN CANNOT BE FOUND!\n" << clear << std::endl;
+		return false;
+	}
+
+	int32_t current_time = time(NULL);
+	int32_t expiration = sqlite3_column_int(sql_handler.stmt, 2);
+
+	//tweak here for expiration
+	if(current_time >= expiration + 10){
+		std::cout << yellow << "SESSION TOKEN EXPIRED" << clear << std::endl;
+		return false;
+	}
+
+	std::cout << blue << "Authenticated!" << clear << std::endl;
 	return true;
 }
