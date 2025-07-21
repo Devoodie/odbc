@@ -18,7 +18,7 @@ namespace handlers {
 
 	void http_get(http_handler &http_handler, sql_utils::query_handler &sql_handler);
 
-	void http_post(std::string_view url, http::response<http::string_body> &response, const char* body, sql_utils::query_handler &sql_handler);
+	void http_post(http_handler &http_handlelr, sql_utils::query_handler &sql_handler);
 }
 
 namespace endpoints {

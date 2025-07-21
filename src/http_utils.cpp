@@ -19,7 +19,8 @@ void handlers::handle_connection(ip::tcp::socket &socket, sql_utils::query_handl
 		handlers::http_get(handler, sql_handler);
 	}
 	else if(handler.request.method() == http::verb::post){
-		handlers::http_post(handler.request.target(), handler.response, handler.request.body().c_str(), sql_handler);
+		//http_hanndler sql_handler
+		handlers::http_post(handler, sql_handler);
 	};
 	http::write(socket, handler.response, ec);
 	socket.close();
@@ -64,10 +65,11 @@ void handlers::http_get(handlers::http_handler &http_handler, sql_utils::query_h
 	delete[] body;
 }
 
-void handlers::http_post(std::string_view url, http::response<http::string_body> &response, const char* body, sql_utils::query_handler &sql_handler){
-	std::cout << blue << "Posting: " << url << clear << std::endl;
+void handlers::http_post(http_handler &http_handler, sql_utils::query_handler &sql_handler){
+	std::string url = http_handler.request.target();
+	std::cout << blue << "Posting: " << http_handler.request.target() << clear << std::endl;
 	if(url == "/login"){
-		endpoints::login(body, response, sql_handler);
+		endpoints::login(http_handler.request.body().c_str(), http_handler.response, sql_handler);
 	}
 }
 
