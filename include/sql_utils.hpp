@@ -31,4 +31,5 @@ namespace sql_utils{
 	void query_db(query_handler &sql_handler); 
 
 	int insert_db(query_handler &sql_handler);
+	
 }

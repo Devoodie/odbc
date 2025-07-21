@@ -7,7 +7,7 @@
 using namespace boost::asio;
 using namespace boost::beast;
 namespace handlers {
-	struct http_handler{
+	struct http_handler {
 			flat_buffer read_buffer;
 			std::string write_buffer;
 			http::request<http::string_body> request;
@@ -26,5 +26,7 @@ namespace endpoints {
 
 	void route(std::string &endpoint);
 
-	char* open_file(std::string path, int &length);
+	char* OpenFile(std::string path, int &length);
+
+	char* GetResources(sql_utils::query_handler &sql_handler, int user_id);
 }

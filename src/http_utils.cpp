@@ -33,18 +33,27 @@ void handlers::http_get(handlers::http_handler &http_handler, sql_utils::query_h
 	std::string path = "./frontend";
 	path.append(url);
 
+	//if else power!
 	if(url == "/"){
-
 		bool authenticated = sql_utils::CheckSession(sql_handler, http_handler.request[http::field::cookie]);
 		if(authenticated){
 			path.append("index.html");
 		} else {
 			path.append("index_locked.html");
 		}
-		body = endpoints::open_file(path, length);
+		body = endpoints::OpenFile(path, length);
 
-	} else if(url == "/output.css"){
-		body = endpoints::open_file(path, length);
+	} else if (url == "/resources"){
+		bool authenticated = sql_utils::CheckSession(sql_handler, http_handler.request[http::field::cookie]);
+		if(authenticated){
+			//body = endpoints::GetResources();
+		} else {
+			path.append("index_locked.html");
+			body = endpoints::OpenFile(path, length);
+		}
+	}
+	else if(url == "/output.css"){
+		body = endpoints::OpenFile(path, length);
 	}
 	if(url == "/output.css"){
 		http_handler.response.set(http::field::content_type, "text/css");
@@ -144,12 +153,7 @@ void endpoints::login(const char *body, http::response<http::string_body> &respo
 		}
 }
 
-//finish routing
-void endpoints::route(std::string &endpoint){
-	if(false);
-}
-
-char* endpoints::open_file(std::string path, int &length){
+char* endpoints::OpenFile(std::string path, int &length){
 	char* file;
 	std::ifstream file_stream;
 	file_stream.open(path.c_str());
@@ -178,3 +182,8 @@ char* endpoints::open_file(std::string path, int &length){
 
 	return file; 
 }
+
+char* endpoints::GetResources(sql_utils::query_handler &sql_handler, int user_id){
+	//I need to finish and test the JOIN query
+	sqlite3_prepare_v2(sql_handler.db, "", -1, &sql_handler.stmt, nullptr);
+}; 
