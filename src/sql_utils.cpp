@@ -4,6 +4,7 @@
 #include <boost/uuid/uuid.hpp>
 #include <cassert>
 #include <inja.hpp>
+#include <string>
 #include "../include/sql_utils.hpp"
 #include "../include/terminal_colors.h"
 
@@ -96,8 +97,8 @@ int sql_utils::insert_db(sql_utils::query_handler &sql_handler){
 	return sql_handler.rc;
 };
 
+//query db should be done before this function is called
 int sql_utils::GetUserSession(query_handler &sql_handler, http::response<http::string_body> &response, std::string password){
-	sql_utils::query_db(sql_handler);
 	if(sql_handler.rc != SQLITE_OK) return sql_handler.rc;
 
 	sql_handler.rc = sqlite3_step(sql_handler.stmt);
@@ -187,7 +188,6 @@ bool sql_utils::CheckSession(query_handler &sql_handler, std::string cookie){
 
 	sql_handler.values.push_back("'"+ token + "'");
 
-	std::cout << yellow << token << clear << std::endl;
 	sql_utils::query_db(sql_handler);
 
 	sql_handler.rc = sqlite3_step(sql_handler.stmt);
@@ -205,6 +205,24 @@ bool sql_utils::CheckSession(query_handler &sql_handler, std::string cookie){
 		std::cout << yellow << "SESSION TOKEN EXPIRED" << clear << std::endl;
 		return false;
 	}
+
+	sqlite3_finalize(sql_handler.stmt);
+
+	std::string update = "UPDATE sessions\nSET expiration=" + to_string(current_time + 10) + "\nWHERE session_token='" + token + "';";
+
+	sql_handler.rc = sqlite3_prepare_v2(sql_handler.db, update.c_str(), -1, &sql_handler.stmt, nullptr);
+
+	if(sql_handler.rc != SQLITE_OK){
+		std::cerr << red <<  "SQLITE PREPARE ERROR: " << sql_handler.rc << clear << std::endl;
+	}
+
+	sql_handler.rc = sqlite3_step(sql_handler.stmt);
+
+	if(sql_handler.rc != SQLITE_DONE){
+		std::cerr << red << "EXPIRATION UPDATE ERROR: " << sql_handler.rc << clear << std::endl;
+	}
+
+	sqlite3_finalize(sql_handler.stmt);
 
 	std::cout << blue << "Authenticated!" << clear << std::endl;
 	return true;

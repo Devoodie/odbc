@@ -45,8 +45,6 @@ int main() {
 	boost::system::error_code ec;
 	tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), 8085));
 
-	boost::beast::flat_buffer read_buffer;
-
 	try {
 		tcp::socket socket(io_context);
 		while(true){

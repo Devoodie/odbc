@@ -16,13 +16,9 @@ void handlers::handle_connection(ip::tcp::socket &socket, sql_utils::query_handl
 	http::read(socket, handler.read_buffer, handler.request, ec);
 
 	if(handler.request.method() == http::verb::get){
-		//authenticate
-		std::string cookie = handler.request[http::field::cookie];
-		sql_utils::CheckSession(sql_handler, cookie);
 		handlers::http_get(handler, sql_handler);
 	}
 	else if(handler.request.method() == http::verb::post){
-		std::cout << yellow << "BODY:\n" << handler.request.body().c_str() << clear << std::endl;
 		handlers::http_post(handler.request.target(), handler.response, handler.request.body().c_str(), sql_handler);
 	};
 	http::write(socket, handler.response, ec);
@@ -37,19 +33,30 @@ void handlers::http_get(handlers::http_handler &http_handler, sql_utils::query_h
 	path.append(url);
 
 	if(url == "/"){
-		path.append("index.html");
+
+		bool authenticated = sql_utils::CheckSession(sql_handler, http_handler.request[http::field::cookie]);
+		if(authenticated){
+			path.append("index.html");
+		} else {
+			path.append("index_locked.html");
+		}
+		body = endpoints::open_file(path, length);
+
+	} else if(url == "/output.css"){
+		body = endpoints::open_file(path, length);
 	}
 	if(url == "/output.css"){
 		http_handler.response.set(http::field::content_type, "text/css");
 	} else {
 		http_handler.response.set(http::field::content_type, "text/html");
 	}
+
 	//check if null
-	body = endpoints::open_file(path, length);
 
 	if(body == nullptr){ 
 		body = new char[1];
 	}
+
 	http_handler.response.base().result(200);
 	http_handler.response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
 	http_handler.response.content_length(length);
