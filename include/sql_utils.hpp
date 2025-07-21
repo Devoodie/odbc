@@ -7,7 +7,7 @@ using namespace std;
 using namespace boost::beast;
 
 namespace sql_utils{
-	struct query_handler{
+	struct query_handler {
 		sqlite3 *db;
 		sqlite3_stmt *stmt;
 		int rc;
@@ -17,10 +17,15 @@ namespace sql_utils{
 		vector<string> columns;
 	};
 
-	struct session{
+	struct session {
 		int id;
 		string uuid;
 		uint32_t expiration;
+	};
+
+	struct resources{
+		int vm_id;
+		string vm_name;
 	};
 
 	int GetUserSession(query_handler &sql_handler, http::response<http::string_body> &response, string password);

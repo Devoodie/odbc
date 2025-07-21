@@ -184,6 +184,24 @@ char* endpoints::OpenFile(std::string path, int &length){
 }
 
 char* endpoints::GetResources(sql_utils::query_handler &sql_handler, int user_id){
-	//I need to finish and test the JOIN query
-	sqlite3_prepare_v2(sql_handler.db, "", -1, &sql_handler.stmt, nullptr);
+
+	std::vector<sql_utils::resources> resources;
+	sql_handler.rc = sqlite3_prepare_v2(sql_handler.db, "SELECT vm_id, vm_name FROM resources\nINNER JOIN users\nON owner = ID;", -1, &sql_handler.stmt, nullptr);
+
+	if(sql_handler.rc != SQLITE_OK){	
+		std::cout << red << "SQLITE PREPARE ERROR: " << sql_handler.rc << clear << std::endl;
+		return nullptr;
+	}
+
+	sql_handler.rc = sqlite3_step(sql_handler.stmt);
+
+	while(sql_handler.rc == SQLITE_ROW){
+		int vm_id = sqlite3_column_int(sql_handler.stmt, 0);
+		std::string vm_name = reinterpret_cast<const char *>(sqlite3_column_text(sql_handler.stmt, 1));
+		resources.emplace_back(vm_id, vm_name);
+	}
+
+	sqlite3_finalize(sql_handler.stmt);
+
+	//use inja to insert a resource template and return a body
 }; 
