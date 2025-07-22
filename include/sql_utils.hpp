@@ -19,7 +19,7 @@ namespace sql_utils{
 
 	struct session {
 		int id;
-		string uuid;
+		string username;
 		uint32_t expiration;
 	};
 
@@ -30,7 +30,7 @@ namespace sql_utils{
 
 	int GetUserSession(query_handler &sql_handler, http::response<http::string_body> &response, string password);
 
-	bool CheckSession(query_handler &sql_handler, std::string cookie);
+	bool CheckSession(query_handler &sql_handler, std::string cookie, session &user_session);
 
 	//prepares query
 	void query_db(query_handler &sql_handler); 

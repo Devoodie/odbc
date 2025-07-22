@@ -133,7 +133,7 @@ int sql_utils::GetUserSession(query_handler &sql_handler, http::response<http::s
 				boost::uuids::uuid uuid = gen();
 
 				//wonder what the performance difference will be compared to storing as blob
-				std::string session = boost::uuids::to_string(uuid);
+				std::string session_uuid = boost::uuids::to_string(uuid);
 
 				uint32_t expiration = time(NULL);
 
@@ -144,12 +144,12 @@ int sql_utils::GetUserSession(query_handler &sql_handler, http::response<http::s
 				sql_handler.columns.clear();
 
 				sql_handler.columns = {"user_id", "session_token", "expiration"};
-				sql_handler.values = { std::to_string(user_id), "'" + session + "'", std::to_string(expiration)};
+				sql_handler.values = { std::to_string(user_id), "'" + session_uuid + "'", std::to_string(expiration)};
 				sql_utils::insert_db(sql_handler);
 
 				sqlite3_finalize(sql_handler.stmt);
 
-				std::string cookie = "session_token=" + session + ";" + "SameSite=Strict; Max-Age=120";
+				std::string cookie = "session_token=" + session_uuid + ";" + "SameSite=Strict; Max-Age=120";
 				response.set(http::field::set_cookie, cookie);
 				return 0;
 			}
@@ -168,7 +168,7 @@ int sql_utils::GetUserSession(query_handler &sql_handler, http::response<http::s
 
 // save the query!
 // checking the session should renew expiration if its valid
-bool sql_utils::CheckSession(query_handler &sql_handler, std::string cookie){
+bool sql_utils::CheckSession(query_handler &sql_handler, std::string cookie, sql_utils::session &user_session){
 // add token expiration renewal
 	sql_handler.keys.clear();
 	sql_handler.values.clear();
@@ -205,23 +205,37 @@ bool sql_utils::CheckSession(query_handler &sql_handler, std::string cookie){
 		std::cout << yellow << "SESSION TOKEN EXPIRED" << clear << std::endl;
 		return false;
 	}
-
+	user_session.id = sqlite3_column_int(sql_handler.stmt, 0);
 	sqlite3_finalize(sql_handler.stmt);
 
 	std::string update = "UPDATE sessions\nSET expiration=" + to_string(current_time + 10) + "\nWHERE session_token='" + token + "';";
 
 	sql_handler.rc = sqlite3_prepare_v2(sql_handler.db, update.c_str(), -1, &sql_handler.stmt, nullptr);
-
 	if(sql_handler.rc != SQLITE_OK){
 		std::cerr << red <<  "SQLITE PREPARE ERROR: " << sql_handler.rc << clear << std::endl;
 	}
 
 	sql_handler.rc = sqlite3_step(sql_handler.stmt);
-
 	if(sql_handler.rc != SQLITE_DONE){
 		std::cerr << red << "EXPIRATION UPDATE ERROR: " << sql_handler.rc << clear << std::endl;
 	}
+	sqlite3_finalize(sql_handler.stmt);
 
+	std::string name_query = "SELECT user_name FROM users\nWHERE ID ='";
+	name_query += to_string(user_session.id) + "'" + ";";
+
+	sql_handler.rc = sqlite3_prepare_v2(sql_handler.db, name_query.c_str(), -1, &sql_handler.stmt, nullptr);
+	if(sql_handler.rc != SQLITE_OK){
+		std::cerr << red <<  "SQLITE PREPARE ERROR: " << sql_handler.rc << clear << std::endl;
+	} else {
+		sql_handler.rc = sqlite3_step(sql_handler.stmt);
+	}
+
+	if(sql_handler.rc != SQLITE_ROW){
+		std::cout << red << "SQLITE STEP ERROR: " << sql_handler.rc << clear << std::endl;
+	} else {
+		user_session.username = reinterpret_cast<const char *>(sqlite3_column_text(sql_handler.stmt, 0));
+	}
 	sqlite3_finalize(sql_handler.stmt);
 
 	std::cout << blue << "Authenticated!" << clear << std::endl;

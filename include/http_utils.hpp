@@ -26,7 +26,7 @@ namespace endpoints {
 
 	void route(std::string &endpoint);
 
-	char* OpenFile(std::string path, int &length);
+	char* OpenFile(std::string path);
 
-	char* GetResources(sql_utils::query_handler &sql_handler, int user_id);
+	string GetResources(sql_utils::query_handler &sql_handler, int user_id);
 }
