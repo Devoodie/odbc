@@ -30,6 +30,7 @@ void handlers::handle_connection(ip::tcp::socket &socket, sql_utils::query_handl
 void handlers::http_get(handlers::http_handler &http_handler, sql_utils::query_handler &sql_handler){
 	std::string url = http_handler.request.target();
 	char *body;
+	int length = 0;
 	std::string path = "./frontend";
 	path.append(url);
 
@@ -48,8 +49,15 @@ void handlers::http_get(handlers::http_handler &http_handler, sql_utils::query_h
 		sql_utils::session user_session;
 		bool authenticated = sql_utils::CheckSession(sql_handler, http_handler.request[http::field::cookie], user_session);
 		if(authenticated){
-			// continue work here
-			body = endpoints::GetResources(sql_handler, user_session.id);
+			//lets think about what happens here. 
+			//allocation 1, when the string is created in get resources. 
+			//move 1, when the string is moved into the body_copy variable. 
+			//allocation 2, when i create a new char array and assign it to body,
+			//copy 1, when i use body_copy into the body variable.
+			//how can i reduce this!?
+			std::string body_copy = endpoints::GetResources(sql_handler, user_session.id);
+			body = new char[body_copy.length()];
+			body_copy.copy(body, body_copy.length());
 		} else {
 			path.append("index_locked.html");
 			body = endpoints::OpenFile(path);
@@ -72,8 +80,8 @@ void handlers::http_get(handlers::http_handler &http_handler, sql_utils::query_h
 
 	http_handler.response.base().result(200);
 	http_handler.response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-	http_handler.response.content_length(http_handler.response.body().length());
 	http_handler.response.body() = body;
+	http_handler.response.content_length(http_handler.response.body().length());
 	delete[] body;
 }
 
@@ -192,20 +200,21 @@ char* endpoints::OpenFile(std::string path){
 
 std::string endpoints::GetResources(sql_utils::query_handler &sql_handler, int user_id){
 	std::string body;
-
 	sql_handler.rc = sqlite3_prepare_v2(sql_handler.db, "SELECT vm_id, vm_name FROM resources\nINNER JOIN users\nON owner = ID;", -1, &sql_handler.stmt, nullptr);
 
 	if(sql_handler.rc != SQLITE_OK){	
 		std::cout << red << "SQLITE PREPARE ERROR: " << sql_handler.rc << clear << std::endl;
-		return nullptr;
+		return "";
 	}
 
 	sql_handler.rc = sqlite3_step(sql_handler.stmt);
 
+	body += "<p class=\"dark:text-white\">Resources</p>";
 	while(sql_handler.rc == SQLITE_ROW){
 		int vm_id = sqlite3_column_int(sql_handler.stmt, 0);
 		std::string vm_name = reinterpret_cast<const char *>(sqlite3_column_text(sql_handler.stmt, 1));
 		body += "<p>(" + to_string(vm_id) + ")" + " " + vm_name + "</p>";
+		sql_handler.rc = sqlite3_step(sql_handler.stmt);
 	}
 
 	sqlite3_finalize(sql_handler.stmt);
