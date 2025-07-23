@@ -8,8 +8,11 @@
 #include <boost/asio/read.hpp>
 #include <boost/bind/bind.hpp>
 #include <boost/beast/http.hpp>
+#include <inja.hpp>
 #include "../include/http_utils.hpp"
 #include "../include/terminal_colors.h"
+
+constexpr std::string_view resources_dir = "../templates/html/resources.html";
 
 void handlers::handle_connection(ip::tcp::socket &socket, sql_utils::query_handler &sql_handler, boost::system::error_code &ec){
 
@@ -199,6 +202,9 @@ char* endpoints::OpenFile(std::string path){
 //I would like for the function signature to stay the same on endpoints
 
 std::string endpoints::GetResources(sql_utils::query_handler &sql_handler, int user_id){
+	inja::Environment env;
+
+
 	std::string body;
 	sql_handler.rc = sqlite3_prepare_v2(sql_handler.db, "SELECT vm_id, vm_name FROM resources\nINNER JOIN users\nON owner = ID;", -1, &sql_handler.stmt, nullptr);
 
@@ -209,13 +215,21 @@ std::string endpoints::GetResources(sql_utils::query_handler &sql_handler, int u
 
 	sql_handler.rc = sqlite3_step(sql_handler.stmt);
 
-	//replace this with a template
 	body += "<p class=\"dark:text-white h-8 pt-1 pl-2 border-b border-sky-500\">Resources</p>";
 
+	inja::Template resource_template = env.parse_template(resources_dir);
+	inja::json data;
+	//replace this with a template
+	
+
+	std::string buffer;
 	while(sql_handler.rc == SQLITE_ROW){
+		body += "\n";
 		int vm_id = sqlite3_column_int(sql_handler.stmt, 0);
 		std::string vm_name = reinterpret_cast<const char *>(sqlite3_column_text(sql_handler.stmt, 1));
-		body += "<p>(" + to_string(vm_id) + ")" + " " + vm_name + "</p>";
+		data["resource"] = "(" + to_string(vm_id) + ")" + " " + vm_name; 
+
+		body += env.render(resource_template, data);
 		sql_handler.rc = sqlite3_step(sql_handler.stmt);
 	}
 
