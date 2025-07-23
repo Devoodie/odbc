@@ -140,7 +140,7 @@ void endpoints::login(const char *body, http::response<http::string_body> &respo
 			response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
 			response.content_length(0);
 		} else {
-			fstream modal("../templates/modal.html");
+			fstream modal("../templates/html/modal.html");
 			if(modal.is_open()){
 				modal.seekg(0, modal.end);
 				int length = modal.tellg();
@@ -209,7 +209,9 @@ std::string endpoints::GetResources(sql_utils::query_handler &sql_handler, int u
 
 	sql_handler.rc = sqlite3_step(sql_handler.stmt);
 
-	body += "<p class=\"dark:text-white\">Resources</p>";
+	//replace this with a template
+	body += "<p class=\"dark:text-white h-8 pt-1 pl-2 border-b border-sky-500\">Resources</p>";
+
 	while(sql_handler.rc == SQLITE_ROW){
 		int vm_id = sqlite3_column_int(sql_handler.stmt, 0);
 		std::string vm_name = reinterpret_cast<const char *>(sqlite3_column_text(sql_handler.stmt, 1));

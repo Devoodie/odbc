@@ -42,7 +42,7 @@ void sql_utils::query_db(sql_utils::query_handler &sql_handler){
 	query_params["table"] = sql_handler.table;
 	query_params["where"] = where_clause;
 
-	query = env.render_file("../templates/select.sql", query_params);
+	query = env.render_file("../templates/sql/select.sql", query_params);
 
 	std::cout << yellow << "QUERY:\n" << query << clear << std::endl;
 
@@ -78,7 +78,7 @@ int sql_utils::insert_db(sql_utils::query_handler &sql_handler){
 	query_params["table"] = sql_handler.table;
 	query_params["values"] = values;
 
-	query = env.render_file("../templates/insert.sql", query_params);
+	query = env.render_file("../templates/sql/insert.sql", query_params);
 
 	std::cout << yellow << "QUERY:\n" << query << clear << std::endl;
 
