@@ -13,6 +13,7 @@
 #include "../include/terminal_colors.h"
 
 constexpr std::string_view resources_dir = "../templates/html/resources.html";
+constexpr const char* authenticated_dir = "../templates/html/authenticated.html";
 
 void handlers::handle_connection(ip::tcp::socket &socket, sql_utils::query_handler &sql_handler, boost::system::error_code &ec){
 
@@ -26,6 +27,7 @@ void handlers::handle_connection(ip::tcp::socket &socket, sql_utils::query_handl
 		//http_hanndler sql_handler
 		handlers::http_post(handler, sql_handler);
 	};
+	std::cout << yellow << "RESPONSE BODY LENGTH: " << handler.response.body().length() << clear << std::endl;
 	http::write(socket, handler.response, ec);
 	socket.close();
 }
@@ -62,7 +64,7 @@ void handlers::http_get(handlers::http_handler &http_handler, sql_utils::query_h
 			body = new char[body_copy.length()];
 			body_copy.copy(body, body_copy.length());
 		} else {
-			path.append("index_locked.html");
+			path = "./frontend/index_locked.html";
 			body = endpoints::OpenFile(path);
 		}
 	}
@@ -138,10 +140,10 @@ void endpoints::login(const char *body, http::response<http::string_body> &respo
 
 		if(!bad){
 			std::cout << blue << "Authenticated!" << clear << std::endl;
-			response.body() = "";
+			response.body() = endpoints::OpenFile(authenticated_dir);
 			response.base().result(200);
 			response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-			response.content_length(0);
+			response.content_length(response.body().length());
 		} else {
 			fstream modal("../templates/html/modal.html");
 			if(modal.is_open()){
@@ -194,6 +196,7 @@ char* endpoints::OpenFile(std::string path){
 	}
 
 	file_stream.close();
+	std::cout << yellow << "BODY LENGTH:"  << length << clear << std::endl;
 
 	return file; 
 }
@@ -203,7 +206,6 @@ char* endpoints::OpenFile(std::string path){
 
 std::string endpoints::GetResources(sql_utils::query_handler &sql_handler, int user_id){
 	inja::Environment env;
-
 
 	std::string body;
 	sql_handler.rc = sqlite3_prepare_v2(sql_handler.db, "SELECT vm_id, vm_name FROM resources\nINNER JOIN users\nON owner = ID;", -1, &sql_handler.stmt, nullptr);
@@ -221,10 +223,9 @@ std::string endpoints::GetResources(sql_utils::query_handler &sql_handler, int u
 	inja::json data;
 	//replace this with a template
 	
-
 	std::string buffer;
+	body += "\n";
 	while(sql_handler.rc == SQLITE_ROW){
-		body += "\n";
 		int vm_id = sqlite3_column_int(sql_handler.stmt, 0);
 		std::string vm_name = reinterpret_cast<const char *>(sqlite3_column_text(sql_handler.stmt, 1));
 		data["resource"] = "(" + to_string(vm_id) + ")" + " " + vm_name; 
