@@ -48,7 +48,7 @@ void handlers::http_get(handlers::http_handler &http_handler, sql_utils::query_h
 		} else {
 			path.append("index_locked.html");
 		}
-		body = endpoints::OpenFile(path);
+		body = endpoints::OpenFile(path, length);
 
 	} else if (url == "/resources"){
 		sql_utils::session user_session;
@@ -63,13 +63,15 @@ void handlers::http_get(handlers::http_handler &http_handler, sql_utils::query_h
 			std::string body_copy = endpoints::GetResources(sql_handler, user_session.id);
 			body = new char[body_copy.length()];
 			body_copy.copy(body, body_copy.length());
+			length = body_copy.length();
 		} else {
 			path = "./frontend/index_locked.html";
-			body = endpoints::OpenFile(path);
+			body = new char[1];
+			length = 0;
 		}
 	}
 	else if(url == "/output.css"){
-		body = endpoints::OpenFile(path);
+		body = endpoints::OpenFile(path, length);
 	}
 	if(url == "/output.css"){
 		http_handler.response.set(http::field::content_type, "text/css");
@@ -86,7 +88,7 @@ void handlers::http_get(handlers::http_handler &http_handler, sql_utils::query_h
 	http_handler.response.base().result(200);
 	http_handler.response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
 	http_handler.response.body() = body;
-	http_handler.response.content_length(http_handler.response.body().length());
+	http_handler.response.content_length(length);
 	delete[] body;
 }
 
@@ -99,6 +101,7 @@ void handlers::http_post(http_handler &http_handler, sql_utils::query_handler &s
 }
 
 void endpoints::login(const char *body, http::response<http::string_body> &response, sql_utils::query_handler &sql_handler){
+	int length = 0;
 		std::string field;
 		std::string value;
 		bool field_or_val = 1;
@@ -140,10 +143,10 @@ void endpoints::login(const char *body, http::response<http::string_body> &respo
 
 		if(!bad){
 			std::cout << blue << "Authenticated!" << clear << std::endl;
-			response.body() = endpoints::OpenFile(authenticated_dir);
+			response.body() = endpoints::OpenFile(authenticated_dir, length);
 			response.base().result(200);
 			response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-			response.content_length(response.body().length());
+			response.content_length(length);
 		} else {
 			fstream modal("../templates/html/modal.html");
 			if(modal.is_open()){
@@ -169,9 +172,8 @@ void endpoints::login(const char *body, http::response<http::string_body> &respo
 		}
 }
 
-char* endpoints::OpenFile(std::string path){
+char* endpoints::OpenFile(std::string path, int &length){
 	char* file;
-	int length = 0;
 	std::ifstream file_stream;
 	file_stream.open(path.c_str());
 

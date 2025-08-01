@@ -24,9 +24,7 @@ namespace handlers {
 namespace endpoints {
 	void login(const char* body, http::response<http::string_body> &response, sql_utils::query_handler &sql_handler);
 
-	void route(std::string &endpoint);
-
-	char* OpenFile(std::string path);
+	char* OpenFile(std::string path, int &length);
 
 	string GetResources(sql_utils::query_handler &sql_handler, int user_id);
 }
