@@ -1,0 +1,2 @@
+/usr/bin/ar qc libsql_utils.a CMakeFiles/sql_utils.dir/src/sql_utils.cpp.o
+/usr/bin/ranlib libsql_utils.a

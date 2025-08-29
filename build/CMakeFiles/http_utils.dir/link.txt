@@ -1,0 +1,2 @@
+/usr/bin/ar qc libhttp_utils.a CMakeFiles/http_utils.dir/src/http_utils.cpp.o
+/usr/bin/ranlib libhttp_utils.a

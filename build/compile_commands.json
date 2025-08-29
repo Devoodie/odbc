@@ -1,0 +1,26 @@
+[
+{
+  "directory": "/home/devooty/programming/odbc/build",
+  "command": "/usr/bin/cc  -I/home/devooty/programming/odbc/./sqlite -I/home/devooty/programming/odbc/./include  -o CMakeFiles/sqlite3.dir/sqlite/sqlite3.c.o -c /home/devooty/programming/odbc/sqlite/sqlite3.c",
+  "file": "/home/devooty/programming/odbc/sqlite/sqlite3.c",
+  "output": "CMakeFiles/sqlite3.dir/sqlite/sqlite3.c.o"
+},
+{
+  "directory": "/home/devooty/programming/odbc/build",
+  "command": "/usr/bin/c++  -I/home/devooty/programming/odbc/./sqlite -I/home/devooty/programming/odbc/./include  -o CMakeFiles/sql_utils.dir/src/sql_utils.cpp.o -c /home/devooty/programming/odbc/src/sql_utils.cpp",
+  "file": "/home/devooty/programming/odbc/src/sql_utils.cpp",
+  "output": "CMakeFiles/sql_utils.dir/src/sql_utils.cpp.o"
+},
+{
+  "directory": "/home/devooty/programming/odbc/build",
+  "command": "/usr/bin/c++  -I/home/devooty/programming/odbc/./sqlite -I/home/devooty/programming/odbc/./include -std=gnu++17 -o CMakeFiles/http_utils.dir/src/http_utils.cpp.o -c /home/devooty/programming/odbc/src/http_utils.cpp",
+  "file": "/home/devooty/programming/odbc/src/http_utils.cpp",
+  "output": "CMakeFiles/http_utils.dir/src/http_utils.cpp.o"
+},
+{
+  "directory": "/home/devooty/programming/odbc/build",
+  "command": "/usr/bin/c++  -I/home/devooty/programming/odbc/./sqlite -I/home/devooty/programming/odbc/./include -std=gnu++17 -o CMakeFiles/main.dir/main.cpp.o -c /home/devooty/programming/odbc/main.cpp",
+  "file": "/home/devooty/programming/odbc/main.cpp",
+  "output": "CMakeFiles/main.dir/main.cpp.o"
+}
+]

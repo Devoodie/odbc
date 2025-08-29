@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/main.dir/link.d CMakeFiles/main.dir/main.cpp.o -o main  libsqlite3.a libhttp_utils.a /usr/lib/x86_64-linux-gnu/libargon2.a libsql_utils.a /usr/lib/x86_64-linux-gnu/libargon2.a
