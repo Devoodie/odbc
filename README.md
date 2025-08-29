@@ -4,7 +4,7 @@
 # GOALS
 - This projects main purpose was to familairze me with database interaction within C++ and deepen my understanding of fullstack development. While incorrectly named odbc, sqlite3 doesnt support odbc connection, the SQLITE API was used to prepare and execute queries.
 - The project's scope evolved into -> "Create a single page application that can use terraform to manage a users resources". I quickly realized, after viewing the terraform plugin sdk, that I was using the incorrect tool for the job as Terraforms SDK only supports a select few languages. As a result, I will simply use this as an opportunity to get familiarized with the fork() or exec() system calls and end the project there.
-- *Project Goals:*
+- **Project Goals:**
     - <s>Create a basic initialization procedure for websockets and database connection!</s>
     - <s>Create basic API endpoints for GET/POST basic data!</s>
     - <s>Create Basic Homepage with working login modal!</s>
