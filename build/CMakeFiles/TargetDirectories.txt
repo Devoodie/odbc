@@ -1,6 +1,0 @@
-/home/devooty/programming/odbc/build/CMakeFiles/sqlite3.dir
-/home/devooty/programming/odbc/build/CMakeFiles/http_utils.dir
-/home/devooty/programming/odbc/build/CMakeFiles/sql_utils.dir
-/home/devooty/programming/odbc/build/CMakeFiles/main.dir
-/home/devooty/programming/odbc/build/CMakeFiles/edit_cache.dir
-/home/devooty/programming/odbc/build/CMakeFiles/rebuild_cache.dir
